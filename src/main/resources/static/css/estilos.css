@@ -1,0 +1,147 @@
+/* 
+    Created on : 29 jun 2025, 10:51:32 a. m.
+    Author     : Andgr
+*/
+
+/* ESTILOS INDEX */
+body {
+    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    color: #343a40;
+}
+
+.btn-lg {
+    padding: 12px 32px;
+    font-size: 1.2rem;
+}
+
+
+
+/* Animaciones personalizadas */
+@keyframes fadeUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.fade-up {
+    animation: fadeUp 0.8s ease-in-out;
+}
+
+/* Efecto al pasar el mouse por tarjetas */
+.hover-grow:hover {
+    transform: scale(1.03);
+    transition: transform 0.3s ease;
+}
+
+/* Glow on hover */
+.glow:hover {
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Estilos generales */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main h1 {
+    color: #212529;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #343a40;
+}
+
+.card-text {
+    color: #495057;
+}
+
+.btn-outline-dark {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-outline-dark:hover {
+    background-color: #343a40;
+    color: #fff;
+}
+
+/* Asegurar que el footer quede al final */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
+
+body {
+    background-color: #f3f6fb;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.titulo-seccion {
+    font-weight: bold;
+    color: #1e3d59;
+}
+
+.buscar-clientes input {
+    border-radius: 0.375rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #eef4fb;
+}
+
+.table thead th {
+    vertical-align: middle;
+}
+
+.tabla-clientes {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.modal-header-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.modal-header-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+.btn i {
+    vertical-align: middle;
+}
