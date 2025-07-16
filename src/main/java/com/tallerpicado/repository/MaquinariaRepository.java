@@ -1,8 +1,9 @@
 package com.tallerpicado.repository;
 
-import com.tallerpicado.domain.Maquinaria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.tallerpicado.domain.Maquinaria;
 
 @Repository
 public interface MaquinariaRepository extends JpaRepository<Maquinaria, Long> {
