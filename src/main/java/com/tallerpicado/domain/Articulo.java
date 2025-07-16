@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "ARTICULOS")
+@Table(name = "ARTICULOS", schema = "sys") // cambia TALLERPICADO por tu esquema
 @Data
 public class Articulo {
 
