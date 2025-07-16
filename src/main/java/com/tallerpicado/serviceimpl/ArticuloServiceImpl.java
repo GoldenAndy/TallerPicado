@@ -27,6 +27,14 @@ public class ArticuloServiceImpl implements ArticuloService {
 
     @Override
     public Articulo guardar(Articulo articulo) {
+        if (articulo.getId() == null) {
+            Long maxId = articuloRepository.findAll()
+                           .stream()
+                           .mapToLong(Articulo::getId)
+                           .max()
+                           .orElse(0L);
+            articulo.setId(maxId + 1);
+        }
         return articuloRepository.save(articulo);
     }
 

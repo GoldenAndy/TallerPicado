@@ -73,6 +73,7 @@
 </main>
 
 <!-- MODAL: Nueva Maquina -->
+<!-- MODAL: Nueva Maquina -->
 <div class="modal fade" id="modalNuevaMaquina" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form th:action="@{/maquinaria/guardar}" method="post" class="modal-content">
@@ -81,6 +82,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+
+                <!-- ID Manual -->
+                <div class="form-floating mb-3">
+                    <input type="number" class="form-control" name="id" id="id" required>
+                    <label for="id">ID (único)</label>
+                </div>
+
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" name="nombre" id="nombre" required>
                     <label for="nombre">Nombre</label>
@@ -109,6 +117,7 @@
         </form>
     </div>
 </div>
+
 
 <!-- MODAL: Editar Maquina -->
 <div class="modal fade" id="modalEditarMaquina" tabindex="-1" aria-hidden="true">

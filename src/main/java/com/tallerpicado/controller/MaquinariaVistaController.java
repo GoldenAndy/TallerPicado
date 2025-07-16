@@ -14,10 +14,10 @@ public class MaquinariaVistaController {
     @Autowired
     private MaquinariaService maquinariaService;
 
-    @GetMapping("")  // O @GetMapping("/")
+    @GetMapping("")  
     public String listarMaquinaria(Model model) {
         model.addAttribute("maquinas", maquinariaService.obtenerTodas());
-        return "maquinaria";  // Nombre de tu template Thymeleaf
+        return "maquinaria";  
     }
 
     @PostMapping("/guardar")

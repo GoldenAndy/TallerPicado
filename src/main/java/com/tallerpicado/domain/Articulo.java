@@ -9,9 +9,10 @@ import lombok.Data;
 public class Articulo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_ARTICULO")
     private Long id;
+
+
 
     @Column(name = "NOMBRE", nullable = false, length = 100)
     private String nombre;
