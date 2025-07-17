@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de Factura - <span th:text="${factura.id}"></span></title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            border: 1px solid #e0e0e0;
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 2.5em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .invoice-summary {
+            background-color: #e9f5ff;
+            border: 1px solid #cce5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 1.1em;
+            color: #004085;
+        }
+        .invoice-summary p {
+            margin: 5px 0;
+            flex-basis: 48%; /* Dos columnas en desktop */
+        }
+        .invoice-summary strong {
+            color: #002752;
+        }
+        .button-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            margin-right: 5px;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            margin-left: 10px; /* Espacio para el botón de volver */
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 14px 18px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-size: 1.1em;
+            background-color: #fdfdfd;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px dashed #ced4da;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilos para el Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        .form-actions-modal {
+            text-align: right;
+            margin-top: 30px;
+        }
+        .form-actions-modal .btn {
+            margin-left: 10px;
+        }
+        /* Mensajes flash */
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsividad */
+        @media (max-width: 768px) {
+            .invoice-summary p {
+                flex-basis: 100%; /* Una columna en móvil */
+            }
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                border: 1px solid #e0e0e0;
+                margin-bottom: 15px;
+                border-radius: 8px;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #e0e0e0;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                position: absolute;
+                top: 0;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #555;
+            }
+            td:nth-of-type(1):before { content: "ID Detalle:"; }
+            td:nth-of-type(2):before { content: "Artículo:"; }
+            td:nth-of-type(3):before { content: "Tipo:"; }
+            td:nth-of-type(4):before { content: "Cantidad:"; }
+            td:nth-of-type(5):before { content: "Precio Unitario:"; }
+            td:nth-of-type(6):before { content: "Subtotal:"; }
+            td:nth-of-type(7):before { content: "Acciones:"; }
+            .button-container {
+                text-align: center;
+            }
+            .action-buttons {
+                justify-content: flex-end;
+                padding-right: 10px;
+            }
+            .modal-content {
+                width: 90%;
+                padding: 20px;
+            }
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="'Detalles de Factura #' + ${factura.id}"></h1>
+
+        <!-- Resumen de la Factura Principal -->
+        <div class="invoice-summary">
+            <p><strong>Cliente:</strong> <span th:text="${factura.cliente != null ? factura.cliente.nombre : 'N/A'}"></span></p>
+            <p><strong>Empleado:</strong> <span th:text="${factura.empleado != null ? factura.empleado.nombre : 'N/A'}"></span></p>
+            <p><strong>Fecha Emisión:</strong> <span th:text="${#dates.format(factura.fechaEmision, 'dd/MM/yyyy')}"></span></p>
+            <p><strong>Total Factura:</strong> <span th:text="${#numbers.formatDecimal(factura.total, 0, 'COMMA', 2, 'POINT')}"></span></p>
+        </div>
+
+        <div class="button-container">
+            <!-- Botón para abrir el modal de agregar detalle -->
+            <button id="openAddDetailModalBtn" class="btn btn-primary">Agregar Detalle</button>
+            <!-- Botón para volver a la lista de facturas -->
+            <a th:href="@{/facturas-web}" class="btn btn-secondary">Volver a Facturas</a>
+        </div>
+
+        <!-- Mensaje de éxito/error (Flash Attributes) -->
+        <div th:if="${mensajeExito}" class="alert alert-success">
+            <p th:text="${mensajeExito}"></p>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger">
+            <p th:text="${mensajeError}"></p>
+        </div>
+
+        <h2>Detalles del Ítem</h2>
+        <table th:if="${!detallesFactura.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>ID Detalle</th>
+                    <th>Artículo</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="detalle : ${detallesFactura}">
+                    <td th:text="${detalle.id}"></td>
+                    <td th:text="${detalle.articulo != null ? detalle.articulo.nombre : 'N/A'}"></td>
+                    <td th:text="${detalle.articulo != null ? (detalle.articulo.tipo == 'P' ? 'Producto' : 'Servicio') : 'N/A'}"></td>
+                    <td th:text="${detalle.cantidad}"></td>
+                    <td th:text="${#numbers.formatDecimal(detalle.precioUnitario, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${#numbers.formatDecimal(detalle.subtotal, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td>
+                        <div class="action-buttons">
+                            <!-- Botones de acción para cada detalle (editar/eliminar) -->
+                            <a th:href="@{'/facturas-web/' + ${factura.id} + '/detalles/editar/' + ${detalle.id}}" class="btn btn-success">Editar</a>
+                            <a th:href="@{'/facturas-web/' + ${factura.id} + '/detalles/eliminar/' + ${detalle.id}}" class="btn btn-danger">Eliminar</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${detallesFactura.isEmpty()}" class="no-data">
+            <p>No hay detalles para esta factura.</p>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar/Editar Detalle de Factura -->
+    <div id="addEditDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modalTitle">Agregar Nuevo Detalle</h2>
+
+            <!-- Formulario dentro del modal -->
+            <form th:action="@{'/facturas-web/' + ${factura.id} + '/detalles/guardar'}" th:object="${detalleFactura}" method="post">
+                <!-- Campo oculto para el ID del detalle (para edición, si se implementa) -->
+                <input type="hidden" th:field="*{id}" />
+                <!-- Campo oculto para el ID de la factura (ya lo tenemos en la URL, pero es buena práctica) -->
+                <input type="hidden" name="factura.id" th:value="${factura.id}" />
+
+                <div class="form-group">
+                    <label for="articulo">Artículo (Producto/Servicio):</label>
+                    <select id="articulo" th:field="*{articulo.id}" required>
+                        <option value="">-- Seleccione un Artículo --</option>
+                        <option th:each="art : ${articulos}" th:value="${art.id}" th:text="${art.nombre + ' (' + (art.tipo == 'P' ? 'Producto' : 'Servicio') + ')'}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" th:field="*{cantidad}" min="1" required />
+                </div>
+
+                <!-- Opcional: Campo para Precio Unitario si se permite modificarlo manualmente -->
+                <!-- <div class="form-group">
+                    <label for="precioUnitario">Precio Unitario:</label>
+                    <input type="number" id="precioUnitario" th:field="*{precioUnitario}" step="0.01" />
+                </div> -->
+
+                <div class="form-actions-modal">
+                    <button type="submit" class="btn btn-primary">Guardar Detalle</button>
+                    <button type="button" class="btn btn-secondary" id="cancelDetailModalBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Obtener el modal
+        var modal = document.getElementById("addEditDetailModal");
+
+        // Obtener el botón que abre el modal
+        var btn = document.getElementById("openAddDetailModalBtn");
+
+        // Obtener el botón de cerrar (la 'x')
+        var span = document.getElementsByClassName("close-button")[0];
+
+        // Obtener el botón de cancelar dentro del modal
+        var cancelBtn = document.getElementById("cancelDetailModalBtn");
+
+        // Cuando el usuario hace clic en el botón, abre el modal
+        btn.onclick = function() {
+            modal.style.display = "flex"; // Usar flexbox para centrar el modal
+            // Limpiar el formulario y configurar para "Agregar"
+            document.getElementById("modalTitle").innerText = "Agregar Nuevo Detalle";
+            document.querySelector("#addEditDetailModal form").reset();
+            document.querySelector("#addEditDetailModal input[type='hidden'][name='id']").value = ""; // Limpiar ID oculto del detalle
+            // Asegurar que la acción del formulario apunte a la URL de guardar con el ID de la factura
+            var facturaId = /*[[${factura.id}]]*/ 'defaultId'; // Obtener el ID de la factura desde Thymeleaf
+            document.querySelector("#addEditDetailModal form").action = "/facturas-web/" + facturaId + "/detalles/guardar";
+            // Asegurar que el campo oculto con el ID de la factura esté presente
+            document.querySelector("#addEditDetailModal input[type='hidden'][name='factura.id']").value = facturaId;
+        }
+
+        // Cuando el usuario hace clic en <span> (x), cierra el modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Cuando el usuario hace clic en el botón Cancelar, cierra el modal
+        cancelBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Cuando el usuario hace clic en cualquier lugar fuera del modal, lo cierra
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

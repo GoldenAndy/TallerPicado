@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Lista de Producción</title>
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                margin: 20px;
+                background-color: #f0f2f5;
+                color: #333;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 1200px;
+                width: 95%;
+                margin: 20px auto;
+                background-color: #ffffff;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+                border: 1px solid #e0e0e0;
+            }
+            h1 {
+                color: #0056b3;
+                text-align: center;
+                margin-bottom: 35px;
+                font-size: 2.5em;
+                font-weight: bold;
+                letter-spacing: 1px;
+            }
+            .button-container {
+                text-align: right;
+                margin-bottom: 20px;
+            }
+            .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1em;
+                font-weight: 500;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+                text-decoration: none;
+                display: inline-block;
+                text-align: center;
+            }
+            .btn-primary {
+                background-color: #007bff;
+                color: white;
+            }
+            .btn-primary:hover {
+                background-color: #0056b3;
+                transform: translateY(-2px);
+            }
+            .btn-success {
+                background-color: #28a745;
+                color: white;
+                margin-right: 5px;
+            }
+            .btn-success:hover {
+                background-color: #218838;
+                transform: translateY(-1px);
+            }
+            .btn-danger {
+                background-color: #dc3545;
+                color: white;
+            }
+            .btn-danger:hover {
+                background-color: #c82333;
+                transform: translateY(-1px);
+            }
+            .btn-secondary {
+                background-color: #6c757d;
+                color: white;
+            }
+            .btn-secondary:hover {
+                background-color: #5a6268;
+                transform: translateY(-2px);
+            }
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin-top: 25px;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            th, td {
+                border: 1px solid #e0e0e0;
+                padding: 14px 18px;
+                text-align: left;
+                vertical-align: middle;
+            }
+            th {
+                background-color: #007bff;
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.9em;
+            }
+            tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            tr:hover {
+                background-color: #e9ecef;
+                cursor: pointer;
+            }
+            .no-data {
+                text-align: center;
+                padding: 30px;
+                color: #6c757d;
+                font-size: 1.1em;
+                background-color: #fdfdfd;
+                border-radius: 8px;
+                margin-top: 20px;
+                border: 1px dashed #ced4da;
+            }
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Estilos para el Modal */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0,0,0,0.4);
+                justify-content: center;
+                align-items: center;
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 30px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 600px;
+                border-radius: 12px;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+                position: relative;
+                animation: fadeIn 0.3s ease-out;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .close-button {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                position: absolute;
+                top: 10px;
+                right: 20px;
+            }
+            .close-button:hover,
+            .close-button:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #555;
+            }
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            select {
+                width: calc(100% - 20px);
+                padding: 12px 10px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 1em;
+                box-sizing: border-box;
+                transition: border-color 0.3s ease;
+            }
+            input[type="text"]:focus,
+            input[type="number"]:focus,
+            input[type="date"]:focus,
+            select:focus {
+                border-color: #007bff;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            }
+            .form-actions-modal {
+                text-align: right;
+                margin-top: 30px;
+            }
+            .form-actions-modal .btn {
+                margin-left: 10px;
+            }
+            /* Mensajes flash */
+            .alert {
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 15px;
+            }
+            .alert-success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .alert-danger {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            /* Responsividad */
+            @media (max-width: 768px) {
+                table, thead, tbody, th, td, tr {
+                    display: block;
+                }
+                thead tr {
+                    position: absolute;
+                    top: -9999px;
+                    left: -9999px;
+                }
+                tr {
+                    border: 1px solid #e0e0e0;
+                    margin-bottom: 15px;
+                    border-radius: 8px;
+                }
+                td {
+                    border: none;
+                    border-bottom: 1px solid #e0e0e0;
+                    position: relative;
+                    padding-left: 50%;
+                    text-align: right;
+                }
+                td:before {
+                    position: absolute;
+                    top: 0;
+                    left: 6px;
+                    width: 45%;
+                    padding-right: 10px;
+                    white-space: nowrap;
+                    text-align: left;
+                    font-weight: bold;
+                    color: #555;
+                }
+                td:nth-of-type(1):before {
+                    content: "ID Producción:";
+                }
+                td:nth-of-type(2):before {
+                    content: "Máquina:";
+                }
+                td:nth-of-type(3):before {
+                    content: "Orden:";
+                }
+                td:nth-of-type(4):before {
+                    content: "Fecha Inicio:";
+                }
+                td:nth-of-type(5):before {
+                    content: "Fecha Fin:";
+                }
+                td:nth-of-type(6):before {
+                    content: "Estado:";
+                }
+                td:nth-of-type(7):before {
+                    content: "Acciones:";
+                }
+                .button-container {
+                    text-align: center;
+                }
+                .action-buttons {
+                    justify-content: flex-end;
+                    padding-right: 10px;
+                }
+                .modal-content {
+                    width: 90%;
+                    padding: 20px;
+                }
+                input[type="text"],
+                input[type="number"],
+                input[type="date"],
+                select {
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Listado de Producción</h1>
+
+            <div class="button-container">
+                <!-- Botón para abrir el modal de agregar producción -->
+                <button id="openAddProduccionModalBtn" class="btn btn-primary">Agregar Nueva Producción</button>
+            </div>
+
+            <!-- Mensaje de éxito/error (Flash Attributes) -->
+            <div th:if="${mensajeExito}" class="alert alert-success">
+                <p th:text="${mensajeExito}"></p>
+            </div>
+            <div th:if="${mensajeError}" class="alert alert-danger">
+                <p th:text="${mensajeError}"></p>
+            </div>
+
+            <table th:if="${!producciones.isEmpty()}">
+                <thead>
+                    <tr>
+                        <th>ID Producción</th>
+                        <th>Máquina</th>
+                        <th>Orden de Trabajo</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="prod : ${producciones}">
+                        <td th:text="${prod.id}"></td>
+                        <td th:text="${prod.maquina != null ? prod.maquina.nombre : 'N/A'}"></td>
+                        <td th:text="${prod.orden != null ? prod.orden.id : 'N/A'}"></td> <!-- Muestra el ID de la Orden -->
+                        <td th:text="${#dates.format(prod.fechaInicio, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#dates.format(prod.fechaFin, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${prod.estado}"></td>
+                        <td>
+                            <div class="action-buttons">
+                                <!-- Botones de acción para cada producción (editar/eliminar) -->
+                                <a th:href="@{'/produccion-web/editar/' + ${prod.id}}" class="btn btn-success">Editar</a>
+                                <a th:href="@{'/produccion-web/eliminar/' + ${prod.id}}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${producciones.isEmpty()}" class="no-data">
+                <p>No hay registros de producción para mostrar en este momento.</p>
+            </div>
+        </div>
+
+        <!-- Modal para Agregar/Editar Producción -->
+        <div id="addEditProduccionModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="modalTitle">Agregar Nueva Producción</h2>
+
+                <!-- Formulario dentro del modal -->
+                <form th:action="@{/produccion-web/guardar}" th:object="${produccion}" method="post">
+                    <!-- Campo oculto para el ID (para edición, si se implementa) -->
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="form-group">
+                        <label for="maquina">Máquina:</label>
+                        <select id="maquina" th:field="*{maquina.id}" required>
+                            <option value="">-- Seleccione una Máquina --</option>
+                            <option th:each="maq : ${maquinarias}" th:value="${maq.id}" th:text="${maq.nombre}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orden">Orden de Trabajo:</label>
+                        <select id="orden" th:field="*{orden.id}" required>
+                            <option value="">-- Seleccione una Orden --</option>
+                            <option th:each="ord : ${ordenes}" th:value="${ord.id}" th:text="${ord.id + ' - ' + (ord.cliente != null ? ord.cliente.nombre : 'N/A')}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaInicio">Fecha Inicio:</label>
+                        <input type="date" id="fechaInicio" th:field="*{fechaInicio}" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaFin">Fecha Fin:</label>
+                        <input type="date" id="fechaFin" th:field="*{fechaFin}" /> <!-- Fecha Fin puede ser opcional al inicio -->
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estado">Estado:</label>
+                        <select id="estado" th:field="*{estado}" required>
+                            <option value="">-- Seleccione un Estado --</option>
+                            <option value="EN_PROCESO">EN_PROCESO</option>
+                            <option value="FINALIZADA">FINALIZADA</option>
+                            <option value="CANCELADA">CANCELADA</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions-modal">
+                        <button type="submit" class="btn btn-primary">Guardar Producción</button>
+                        <button type="button" class="btn btn-secondary" id="cancelProduccionModalBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Obtener el modal
+            var modal = document.getElementById("addEditProduccionModal");
+
+            // Obtener el botón que abre el modal
+            var btn = document.getElementById("openAddProduccionModalBtn");
+
+            // Obtener el botón de cerrar (la 'x')
+            var span = document.getElementsByClassName("close-button")[0];
+
+            // Obtener el botón de cancelar dentro del modal
+            var cancelBtn = document.getElementById("cancelProduccionModalBtn");
+
+            // Cuando el usuario hace clic en el botón, abre el modal
+            btn.onclick = function () {
+                modal.style.display = "flex"; // Usar flexbox para centrar el modal
+                // Limpiar el formulario y configurar para "Agregar"
+                document.getElementById("modalTitle").innerText = "Agregar Nueva Producción";
+                document.querySelector("#addEditProduccionModal form").reset();
+                document.querySelector("#addEditProduccionModal input[type='hidden']").value = ""; // Limpiar ID oculto
+                document.querySelector("#addEditProduccionModal form").action = "/produccion-web/guardar"; // Asegurar que apunte a guardar
+            }
+
+            // Cuando el usuario hace clic en <span> (x), cierra el modal
+            span.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            // Cuando el usuario hace clic en el botón Cancelar, cierra el modal
+            cancelBtn.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            // Cuando el usuario hace clic en cualquier lugar fuera del modal, lo cierra
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>
