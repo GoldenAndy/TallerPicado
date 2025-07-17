@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name = "MAQUINARIA", schema = "sys") // cambia TALLERPICADO por tu esquema
+@Table(name = "MAQUINARIA") // cambia TALLERPICADO por tu esquema
 public class Maquinaria {
     @Id
 @Column(name = "ID_MAQUINA") 
@@ -78,3 +78,4 @@ private Long id;
         this.estado = estado;
     }
 }
+//comentario de Charlie
