@@ -3,41 +3,53 @@ package com.tallerpicado.controller;
 import com.tallerpicado.domain.Proveedor;
 import com.tallerpicado.service.ProveedorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/proveedores")
-@CrossOrigin(origins = "*")
+@Controller
+@RequestMapping("/proveedores")
 public class ProveedorController {
 
     @Autowired
     private ProveedorService proveedorService;
 
+    // Mostrar vista principal con todos los proveedores
     @GetMapping
-    public List<Proveedor> listar() {
-        return proveedorService.obtenerTodos();
+    public String listarProveedores(Model model) {
+        List<Proveedor> proveedores = proveedorService.obtenerTodos();
+        model.addAttribute("proveedores", proveedores);
+        return "proveedores";
     }
 
-    @GetMapping("/{id}")
-    public Optional<Proveedor> obtener(@PathVariable Long id) {
-        return proveedorService.obtenerPorId(id);
+    // Guardar un nuevo proveedor desde el formulario
+    @PostMapping("/guardar")
+    public String guardarProveedor(@ModelAttribute Proveedor proveedor) {
+        proveedorService.guardar(proveedor);
+        return "redirect:/proveedores";
     }
 
-    @PostMapping
-    public Proveedor crear(@RequestBody Proveedor proveedor) {
-        return proveedorService.guardar(proveedor);
+    // Actualizar proveedor existente desde el modal
+    @PostMapping("/actualizar/{id}")
+    public String actualizarProveedor(@PathVariable Long id, @ModelAttribute Proveedor proveedor) {
+        proveedorService.actualizar(id, proveedor);
+        return "redirect:/proveedores";
     }
 
-    @PutMapping("/{id}")
-    public Proveedor actualizar(@PathVariable Long id, @RequestBody Proveedor proveedor) {
-        return proveedorService.actualizar(id, proveedor);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
+    // Eliminar proveedor
+    @GetMapping("/eliminar/{id}")
+    public String eliminarProveedor(@PathVariable Long id) {
         proveedorService.eliminar(id);
+        return "redirect:/proveedores";
+    }
+
+    // Buscar proveedores por nombre (regex)
+    @GetMapping("/buscar")
+    public String buscarProveedores(@RequestParam("nombre") String nombre, Model model) {
+        List<Proveedor> resultados = proveedorService.buscarPorNombreRegex(nombre);
+        model.addAttribute("proveedores", resultados);
+        return "proveedores";
     }
 }

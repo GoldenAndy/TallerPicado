@@ -2,42 +2,98 @@ package com.tallerpicado.controller;
 
 import com.tallerpicado.domain.Empleado;
 import com.tallerpicado.service.EmpleadoService;
+import com.tallerpicado.service.PuestoService;
+import com.tallerpicado.service.ProveedorService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/empleados")
-@CrossOrigin(origins = "*")
+@Controller
+@RequestMapping("/empleados")
 public class EmpleadoController {
 
     @Autowired
     private EmpleadoService empleadoService;
 
+    @Autowired
+    private PuestoService puestoService;
+
+    @Autowired
+    private ProveedorService proveedorService;
+
+    // Mostrar vista principal con empleados + listas de puestos y proveedores
     @GetMapping
-    public List<Empleado> listar() {
-        return empleadoService.obtenerTodos();
+    public String listarEmpleados(Model model) {
+        model.addAttribute("empleados", empleadoService.obtenerTodos());
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+        return "empleados";
     }
 
-    @GetMapping("/{id}")
-    public Optional<Empleado> obtener(@PathVariable Long id) {
-        return empleadoService.obtenerPorId(id);
+    @PostMapping("/guardar")
+    public String guardarEmpleado(@ModelAttribute Empleado empleado,
+                                   @RequestParam(value = "proveedores", required = false) List<Long> proveedores) {
+        empleado.setProveedores(proveedores);
+        empleadoService.guardar(empleado);
+        return "redirect:/empleados";
     }
 
-    @PostMapping
-    public Empleado crear(@RequestBody Empleado empleado) {
-        return empleadoService.guardar(empleado);
+    @PostMapping("/actualizar/{id}")
+    public String actualizarEmpleado(@PathVariable Long id,
+                                     @ModelAttribute Empleado empleado,
+                                     @RequestParam(value = "proveedores", required = false) List<Long> proveedores) {
+        empleado.setProveedores(proveedores);
+        empleadoService.actualizar(id, empleado);
+        return "redirect:/empleados";
     }
 
-    @PutMapping("/{id}")
-    public Empleado actualizar(@PathVariable Long id, @RequestBody Empleado empleado) {
-        return empleadoService.actualizar(id, empleado);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
+    @GetMapping("/eliminar/{id}")
+    public String eliminarEmpleado(@PathVariable Long id) {
         empleadoService.eliminar(id);
+        return "redirect:/empleados";
+    }
+
+    @GetMapping("/buscar")
+    public String buscarPorNombre(@RequestParam("nombre") String nombre, Model model) {
+        model.addAttribute("empleados", empleadoService.buscarPorNombre(nombre));
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+        return "empleados";
+    }
+
+    @GetMapping("/filtrar/puesto")
+    public String filtrarPorPuesto(@RequestParam("id") Long idPuesto, Model model) {
+        model.addAttribute("empleados", empleadoService.filtrarPorPuesto(idPuesto));
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+        return "empleados";
+    }
+
+    @GetMapping("/filtrar/proveedor")
+    public String filtrarPorProveedor(@RequestParam("id") Long idProveedor, Model model) {
+        model.addAttribute("empleados", empleadoService.filtrarPorProveedor(idProveedor));
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+        return "empleados";
+    }
+
+    @GetMapping("/filtrar/estado")
+    public String filtrarPorEstado(@RequestParam("estado") String estado, Model model) {
+        model.addAttribute("empleados", empleadoService.filtrarPorEstado(estado));
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+        return "empleados";
+    }
+    
+    
+    @GetMapping("/obtener/{id}")
+    @ResponseBody
+    public Empleado obtenerEmpleadoPorId(@PathVariable Long id) {
+        return empleadoService.obtenerPorId(id).orElse(null);
     }
 }
+

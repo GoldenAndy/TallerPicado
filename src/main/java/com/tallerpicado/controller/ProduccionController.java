@@ -7,14 +7,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("/api/produccion")
+@Controller
+@RequestMapping("/produccion")
 @CrossOrigin(origins = "*")
 public class ProduccionController {
 
     @Autowired
     private ProduccionService produccionService;
+
+    
+    @GetMapping("/produccion")
+    public String mostrarVista() {
+        return "produccion"; // apunta a templates/produccion.html
+    }
 
     @GetMapping
     public List<Produccion> listar() {

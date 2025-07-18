@@ -3,6 +3,8 @@ package com.tallerpicado.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "EMPLEADOS")
 @Data
@@ -29,5 +31,26 @@ public class Empleado {
     private String correo;
 
     @Column(name = "ESTADO", length = 20)
-    private String estado; // Considera usar Enum si quieres más control
+    private String estado;
+
+    
+    @Transient
+    private String nombrePuesto;
+
+    
+    @Transient
+    private List<String> proveedoresAsignados;
+
+    
+    @Transient
+    private List<Long> proveedores;
+
+
+    public List<Long> getProveedores() {
+        return proveedores;
+    }
+
+    public void setProveedores(List<Long> proveedores) {
+        this.proveedores = proveedores;
+    }
 }
