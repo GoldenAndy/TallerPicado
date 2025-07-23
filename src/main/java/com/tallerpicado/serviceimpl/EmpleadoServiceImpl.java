@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import java.sql.ResultSet; 
 import java.sql.SQLException; 
 import java.util.*;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 @Service public class EmpleadoServiceImpl implements EmpleadoService {
 
@@ -86,9 +89,11 @@ public List<Empleado> obtenerTodos() {
         List<String> nombresProveedores = obtenerNombresProveedoresDeEmpleado(e.getId());
         e.setProveedoresAsignados(nombresProveedores);
 
-    
+        // 💡 Esta línea es la que te faltaba para que el modal funcione:
         e.setProveedores(obtenerIdsProveedoresDeEmpleado(e.getId()));
 
+        // DEBUG opcional
+        System.out.println("Empleado: " + e.getNombre() + " -> Proveedores: " + nombresProveedores);
     }
 
     return empleados;
@@ -198,6 +203,52 @@ private List<Long> obtenerIdsProveedoresDeEmpleado(Long idEmpleado) {
         WHERE PE.ID_EMPLEADO = ?
     """;
     return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("ID_PROVEEDOR"), idEmpleado);
+}
+
+@Override
+public List<Empleado> filtrarMultiples(String nombre, Long idPuesto, Long idProveedor, String estado) {
+    SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+        .withCatalogName("PAQ_EMPLEADOS")
+        .withFunctionName("FN_FILTRAR_EMPLEADOS_MULTIPLE")
+        .returningResultSet("result", (rs, rowNum) -> {
+            Empleado e = new Empleado();
+            e.setId(rs.getLong("ID_EMPLEADO"));
+            e.setNombre(rs.getString("NOMBRE"));
+            e.setApellido(rs.getString("APELLIDO"));
+            e.setIdPuesto(rs.getLong("ID_PUESTO"));
+            e.setCelular(rs.getString("CELULAR"));
+            e.setCorreo(rs.getString("CORREO"));
+            e.setEstado(rs.getString("ESTADO"));
+            e.setNombrePuesto(rs.getString("NOMBRE_PUESTO"));
+            e.setProveedoresAsignados(obtenerNombresProveedoresDeEmpleado(rs.getLong("ID_EMPLEADO")));
+            return e;
+        });
+
+    SqlParameterSource inParams = new MapSqlParameterSource()
+        .addValue("p_nombre", (nombre != null && !nombre.isBlank()) ? nombre : null)
+        .addValue("p_id_puesto", idPuesto)
+        .addValue("p_id_prov", idProveedor)
+        .addValue("p_estado", (estado != null && !estado.isBlank()) ? estado.toUpperCase() : null);
+
+    return jdbcCall.executeFunction(List.class, inParams);
+}
+
+
+@Override
+public Optional<Empleado> buscarPorNombreExacto(String nombre) {
+    SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+        .withCatalogName("PAQ_EMPLEADOS")
+        .withFunctionName("FN_BUSCAR_EMPLEADO_EXACTO")
+        .returningResultSet("empleados", BeanPropertyRowMapper.newInstance(Empleado.class));
+
+    MapSqlParameterSource params = new MapSqlParameterSource()
+        .addValue("P_NOMBRE", nombre);
+
+    List<Empleado> resultado = jdbcCall.executeFunction(List.class, params);
+    if (resultado != null && !resultado.isEmpty()) {
+        return Optional.of(resultado.get(0));
+    }
+    return Optional.empty();
 }
 
 }

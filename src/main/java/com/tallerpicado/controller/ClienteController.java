@@ -3,7 +3,9 @@ package com.tallerpicado.controller;
 import com.tallerpicado.domain.Cliente;
 import com.tallerpicado.service.ClienteService;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,21 +18,21 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
-    // Mostrar lista de clientes
+
     @GetMapping
     public String mostrarClientes(Model model) {
         model.addAttribute("clientes", clienteService.obtenerTodos());
-        return "clientes"; // Thymeleaf buscará clientes.html
+        return "clientes";
     }
 
-    // Guardar nuevo cliente (desde el modal)
+
     @PostMapping("/guardar")
     public String guardarCliente(@ModelAttribute Cliente cliente) {
         clienteService.guardar(cliente);
         return "redirect:/clientes";
     }
 
-    // Eliminar cliente
+
     @GetMapping("/eliminar/{id}")
     public String eliminarCliente(@PathVariable Long id) {
         clienteService.eliminar(id);
@@ -46,7 +48,7 @@ public class ClienteController {
             clientes = new ArrayList<>();
         }
         model.addAttribute("clientes", clientes);
-        model.addAttribute("usuario", "TALLERPICADO"); // si usás esto en el header
+        model.addAttribute("usuario", "TALLERPICADO");
         return "clientes";
     }
 
@@ -55,6 +57,21 @@ public class ClienteController {
         clienteService.actualizar(id, cliente);
         return "redirect:/clientes";
     }
+
+@GetMapping("/autocompletar")
+@ResponseBody
+public List<Map<String, Object>> autocompletarClientes(@RequestParam("q") String query) {
+    List<Cliente> coincidencias = clienteService.buscarPorNombre(query);
+
+    List<Map<String, Object>> resultados = new ArrayList<>();
+    for (Cliente c : coincidencias) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", c.getId());
+        map.put("nombre", c.getNombre());
+        resultados.add(map);
+    }
+    return resultados;
+}
 
 
 }

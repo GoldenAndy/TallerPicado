@@ -28,5 +28,9 @@ public class OrdenTrabajo {
     private Empleado empleado;
 
     @Column(name = "ESTADO", nullable = false, length = 20)
-    private String estado; // PENDIENTE, EN_PROCESO, FINALIZADA, ENTREGADA
+    private String estado;
+
+    // Constructor vacío (necesario para Spring y formularios)
+    public OrdenTrabajo() {}
+
 }

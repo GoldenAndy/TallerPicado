@@ -25,7 +25,7 @@ public class LoginController {
                                  HttpSession session,
                                  Model model) {
 
-        // Usamos la IP de la máquina virtual y el servicio ORCLPDB
+        // IP de la máquina virtual y el servicio ORCLPDB
         String url = "jdbc:oracle:thin:@192.168.100.69:1521/ORCLPDB";
 
         try (Connection conexion = DriverManager.getConnection(url, usuario, contrasena)) {

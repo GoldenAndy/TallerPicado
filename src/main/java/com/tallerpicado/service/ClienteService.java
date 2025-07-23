@@ -11,4 +11,6 @@ public interface ClienteService {
     Cliente actualizar(Long id, Cliente cliente);
     void eliminar(Long id);
     List<Cliente> buscarPorNombre(String patron);
+    Optional<Cliente> buscarPorNombreExacto(String nombre);
+
 }

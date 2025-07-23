@@ -13,6 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 @Service
 public class ClienteServiceImpl implements ClienteService {
@@ -122,4 +124,22 @@ public class ClienteServiceImpl implements ClienteService {
         cliente.setCorreo(rs.getString("CORREO"));
         return cliente;
     }
+    
+    
+    @Override
+   public Optional<Cliente> buscarPorNombreExacto(String nombre) {
+       SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
+           .withCatalogName("PAQ_CLIENTES")
+           .withFunctionName("FN_BUSCAR_CLIENTE_EXACTO")
+           .returningResultSet("clientes", BeanPropertyRowMapper.newInstance(Cliente.class));
+
+       MapSqlParameterSource params = new MapSqlParameterSource()
+           .addValue("P_NOMBRE", nombre);
+
+       List<Cliente> resultado = jdbcCall.executeFunction(List.class, params);
+       if (resultado != null && !resultado.isEmpty()) {
+           return Optional.of(resultado.get(0));
+       }
+       return Optional.empty();
+   }
 }

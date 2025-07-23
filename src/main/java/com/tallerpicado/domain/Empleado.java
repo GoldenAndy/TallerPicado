@@ -53,4 +53,7 @@ public class Empleado {
     public void setProveedores(List<Long> proveedores) {
         this.proveedores = proveedores;
     }
+    
+    // Constructor vacío requerido por JPA
+    public Empleado() {}
 }

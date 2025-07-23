@@ -4,6 +4,8 @@ import com.tallerpicado.domain.Empleado;
 import com.tallerpicado.service.EmpleadoService;
 import com.tallerpicado.service.PuestoService;
 import com.tallerpicado.service.ProveedorService;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/empleados")
@@ -95,5 +98,40 @@ public class EmpleadoController {
     public Empleado obtenerEmpleadoPorId(@PathVariable Long id) {
         return empleadoService.obtenerPorId(id).orElse(null);
     }
+    
+    @GetMapping("/filtros")
+    public String filtrarEmpleados(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Long idPuesto,
+            @RequestParam(required = false) Long idProveedor,
+            @RequestParam(required = false) String estado,
+            Model model) {
+
+        List<Empleado> empleadosFiltrados = empleadoService.filtrarMultiples(nombre, idPuesto, idProveedor, estado);
+
+        model.addAttribute("empleados", empleadosFiltrados);
+        model.addAttribute("puestos", puestoService.listarPuestos());
+        model.addAttribute("proveedores", proveedorService.obtenerTodos());
+
+        return "empleados";
+    }
+    
+
+@GetMapping("/autocompletar")
+@ResponseBody
+public List<Map<String, Object>> autocompletarEmpleados(@RequestParam("q") String query) {
+    List<Empleado> coincidencias = empleadoService.buscarPorNombre(query);
+
+    List<Map<String, Object>> resultados = new ArrayList<>();
+    for (Empleado e : coincidencias) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", e.getId());
+        map.put("nombre", e.getNombre());
+        resultados.add(map);
+    }
+    return resultados;
+}
+
+
 }
 

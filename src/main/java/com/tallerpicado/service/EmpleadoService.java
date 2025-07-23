@@ -24,4 +24,9 @@ public interface EmpleadoService {
     List<Empleado> filtrarPorProveedor(Long idProveedor);  // FN_BUSCAR_EMPLEADO_POR_PROVEEDOR
 
     List<Empleado> filtrarPorEstado(String estado);  // FN_BUSCAR_EMPLEADO_POR_ESTADO
+    
+    List<Empleado> filtrarMultiples(String nombre, Long idPuesto, Long idProveedor, String estado);
+    
+    Optional<Empleado> buscarPorNombreExacto(String nombre);
+
 }
