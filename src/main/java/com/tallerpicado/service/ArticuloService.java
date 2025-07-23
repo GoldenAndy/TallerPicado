@@ -1,9 +1,9 @@
 package com.tallerpicado.service;
 
-import com.tallerpicado.domain.Articulo;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.tallerpicado.domain.Articulo;
 
 public interface ArticuloService {
     List<Articulo> obtenerTodos();
@@ -11,4 +11,5 @@ public interface ArticuloService {
     Articulo guardar(Articulo articulo);
     Articulo actualizar(Long id, Articulo articulo);
     void eliminar(Long id);
+    List<Articulo> buscarPorNombre(String patron);
 }
