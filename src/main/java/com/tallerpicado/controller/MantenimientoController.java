@@ -2,42 +2,37 @@ package com.tallerpicado.controller;
 
 import com.tallerpicado.domain.Mantenimiento;
 import com.tallerpicado.service.MantenimientoService;
+import com.tallerpicado.service.TipoMantenimientoService;
+import com.tallerpicado.service.MaquinariaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-//Prueba para el github
-@RestController
-@RequestMapping("/api/mantenimientos")
-@CrossOrigin(origins = "*")
+@Controller
+@RequestMapping("/mantenimientos")
 public class MantenimientoController {
 
     @Autowired
     private MantenimientoService mantenimientoService;
 
+    @Autowired
+    private TipoMantenimientoService tipoMantenimientoService;
+
+    @Autowired
+    private MaquinariaService maquinariaService;
+
     @GetMapping
-    public List<Mantenimiento> listar() {
-        return mantenimientoService.obtenerTodos();
+    public String vistaMantenimientos(Model model) {
+        model.addAttribute("mantenimientos", mantenimientoService.obtenerTodos());
+        model.addAttribute("tipos", tipoMantenimientoService.obtenerTodos());
+        model.addAttribute("maquinas", maquinariaService.obtenerTodas());
+        return "mantenimientos";
     }
 
-    @GetMapping("/{id}")
-    public Optional<Mantenimiento> obtener(@PathVariable Long id) {
-        return mantenimientoService.obtenerPorId(id);
-    }
-
-    @PostMapping
-    public Mantenimiento crear(@RequestBody Mantenimiento mantenimiento) {
-        return mantenimientoService.guardar(mantenimiento);
-    }
-
-    @PutMapping("/{id}")
-    public Mantenimiento actualizar(@PathVariable Long id, @RequestBody Mantenimiento mantenimiento) {
-        return mantenimientoService.actualizar(id, mantenimiento);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        mantenimientoService.eliminar(id);
+    @PostMapping("/guardar")
+    public String guardarMantenimiento(@ModelAttribute Mantenimiento mantenimiento) {
+        mantenimientoService.guardar(mantenimiento);
+        return "redirect:/mantenimientos";
     }
 }

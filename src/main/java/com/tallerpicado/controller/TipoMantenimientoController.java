@@ -3,41 +3,31 @@ package com.tallerpicado.controller;
 import com.tallerpicado.domain.TipoMantenimiento;
 import com.tallerpicado.service.TipoMantenimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/tipos-mantenimiento")
-@CrossOrigin(origins = "*")
+@Controller
+@RequestMapping("/tipos-mantenimiento")
 public class TipoMantenimientoController {
 
     @Autowired
-    private TipoMantenimientoService service;
+    private TipoMantenimientoService tipoService;
 
     @GetMapping
-    public List<TipoMantenimiento> listar() {
-        return service.obtenerTodos();
+    public String mostrarTipos(Model model) {
+        List<TipoMantenimiento> tipos = tipoService.obtenerTodos();
+        model.addAttribute("tipos", tipos);
+        return "tipos-mantenimiento";  // <-- nombre exacto de tu html sin extensión
     }
 
-    @GetMapping("/{id}")
-    public Optional<TipoMantenimiento> obtener(@PathVariable Long id) {
-        return service.obtenerPorId(id);
+    @PostMapping("/guardar")
+    public String guardarTipo(@ModelAttribute TipoMantenimiento tipo) {
+        tipoService.guardar(tipo);
+        return "redirect:/tipos-mantenimiento";
     }
 
-    @PostMapping
-    public TipoMantenimiento crear(@RequestBody TipoMantenimiento tipo) {
-        return service.guardar(tipo);
-    }
-
-    @PutMapping("/{id}")
-    public TipoMantenimiento actualizar(@PathVariable Long id, @RequestBody TipoMantenimiento tipo) {
-        return service.actualizar(id, tipo);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        service.eliminar(id);
-    }
+    // Opcional: métodos para actualizar y eliminar usando formularios Thymeleaf
 }
