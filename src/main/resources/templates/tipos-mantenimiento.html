@@ -1,40 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>Tipos de Mantenimiento</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
-<body class="bg-light">
+<body class="d-flex flex-column min-vh-100 bg-light">
 
-<main class="container bg-white p-4 shadow rounded mt-4">
+<!-- HEADER -->
+<div th:replace="fragmentos :: header"></div>
+
+<main class="container bg-white p-4 shadow rounded mb-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>🔧 Tipos de Mantenimiento</h2>
-        <!-- Botón para mostrar formulario nuevo -->
-        <button class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#formNuevoTipo" aria-expanded="false" aria-controls="formNuevoTipo">
+        <h2 class="titulo-seccion">🔧 Tipos de Mantenimiento</h2>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevoTipo">
             <i class="bi bi-plus-circle"></i> Añadir Tipo
         </button>
     </div>
 
-    <!-- Formulario nuevo tipo (colapsable) -->
-    <div class="collapse mb-4" id="formNuevoTipo">
-        <form th:action="@{/tipos-mantenimiento/guardar}" method="post">
-            <div class="mb-3">
-                <label for="nombreNuevo" class="form-label">Nombre del Tipo</label>
-                <input type="text" class="form-control" id="nombreNuevo" name="nombre" placeholder="Ingrese nombre" required />
-            </div>
-            <button type="submit" class="btn btn-success">Guardar</button>
-        </form>
-    </div>
-
-    <!-- Tabla con los tipos -->
+    <!-- Mensaje si no hay tipos -->
     <div th:if="${tipos != null and #lists.isEmpty(tipos)}" class="alert alert-warning text-center">
-        No hay tipos registrados.
+        <i class="bi bi-exclamation-triangle"></i> No hay tipos registrados.
     </div>
 
+    <!-- Tabla de Tipos -->
     <div th:if="${tipos != null}" class="table-responsive">
-        <table class="table table-hover text-center">
+        <table class="table table-hover text-center align-middle">
             <thead class="table-primary">
                 <tr>
                     <th>ID</th>
@@ -47,35 +40,83 @@
                     <td th:text="${t.id}"></td>
                     <td th:text="${t.nombre}"></td>
                     <td>
-                        <a th:href="@{'/tipos-mantenimiento/editar/' + ${t.id}}" class="btn btn-warning btn-sm">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </a>
+                        <button class="btn btn-warning btn-sm me-1"
+                                data-bs-toggle="modal" data-bs-target="#modalEditarTipo"
+                                th:attr="data-id=${t.id}, data-nombre=${t.nombre}">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
                         <a th:href="@{'/tipos-mantenimiento/eliminar/' + ${t.id}}" class="btn btn-danger btn-sm"
                            onclick="return confirm('¿Seguro que desea eliminar este tipo?');">
-                            <i class="bi bi-trash3-fill"></i> Eliminar
+                            <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
-
-    <!-- Formulario edición (solo visible si viene un tipo para editar) -->
-    <div th:if="${tipoMantenimiento != null and tipoMantenimiento.id != null}" class="mt-4">
-        <h4>Editar Tipo</h4>
-        <form th:action="@{/tipos-mantenimiento/actualizar}" method="post">
-            <input type="hidden" name="id" th:value="${tipoMantenimiento.id}" />
-            <div class="mb-3">
-                <label for="nombreEditar" class="form-label">Nombre del Tipo</label>
-                <input type="text" id="nombreEditar" name="nombre" class="form-control" th:value="${tipoMantenimiento.nombre}" required />
-            </div>
-            <button type="submit" class="btn btn-warning">Actualizar</button>
-            <a href="/tipos-mantenimiento" class="btn btn-secondary">Cancelar</a>
-        </form>
-    </div>
-
 </main>
 
+<!-- MODAL: Nuevo Tipo -->
+<div class="modal fade" id="modalNuevoTipo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/tipos-mantenimiento/guardar}" method="post" class="modal-content">
+            <div class="modal-header modal-header-success">
+                <h5 class="modal-title">Registrar Tipo de Mantenimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="nombreNuevo" name="nombre" required>
+                    <label for="nombreNuevo">Nombre del Tipo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Editar Tipo -->
+<div class="modal fade" id="modalEditarTipo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formEditarTipo" th:action="@{/tipos-mantenimiento/actualizar/__id__}" method="post" class="modal-content">
+            <div class="modal-header modal-header-warning">
+                <h5 class="modal-title">Editar Tipo de Mantenimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id" id="editId">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" name="nombre" id="editNombre" required>
+                    <label for="editNombre">Nombre del Tipo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="fragmentos :: footer"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modalEditar = document.getElementById('modalEditarTipo');
+    modalEditar.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const nombre = button.getAttribute('data-nombre');
+
+        document.getElementById('editId').value = id;
+        document.getElementById('editNombre').value = nombre;
+        document.getElementById('formEditarTipo').action = '/tipos-mantenimiento/actualizar/' + id;
+    });
+</script>
+
 </body>
 </html>

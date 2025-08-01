@@ -9,6 +9,9 @@
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
+<!-- HEADER -->
+<div th:replace="fragmentos :: header"></div>
+
 <main class="container bg-white p-4 shadow rounded mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="titulo-seccion">🔧 Mantenimientos Registrados</h2>
@@ -26,8 +29,8 @@
             <thead class="table-primary">
                 <tr>
                     <th>ID</th>
-                    <th>Máquina</th>
-                    <th>Tipo</th>
+                    <th>ID Máquina</th>
+                    <th>ID Tipo</th>
                     <th>Fecha</th>
                     <th>Descripción</th>
                     <th>Acciones</th>
@@ -35,13 +38,19 @@
             </thead>
             <tbody>
                 <tr th:each="m : ${mantenimientos}">
-                    <td th:text="${m.idMantenimiento}"></td>
-                    <td th:text="${m.maquina.nombre}"></td>
-                    <td th:text="${m.tipo.nombre}"></td>
-                    <td th:text="${#temporals.format(m.fechaMantenimiento, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${m.id}"></td>
+                    <td th:text="${m.idMaquina}"></td>
+                    <td th:text="${m.idTipo}"></td>
+                    <td th:text="${#temporals.format(m.fecha, 'yyyy-MM-dd')}"></td>
                     <td th:text="${m.descripcion}"></td>
                     <td>
-                        <a th:href="@{'/mantenimientos/eliminar/' + ${m.idMantenimiento}}" 
+                        <button class="btn btn-warning btn-sm me-1"
+                            data-bs-toggle="modal" data-bs-target="#modalEditarMantenimiento"
+                            th:attr="data-id=${m.id}, data-idmaquina=${m.idMaquina}, data-idtipo=${m.idTipo},
+                                     data-fecha=${m.fecha}, data-descripcion=${m.descripcion}">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <a th:href="@{'/mantenimientos/eliminar/' + ${m.id}}" 
                            class="btn btn-danger btn-sm"
                            onclick="return confirm('¿Deseas eliminar este mantenimiento?');">
                            <i class="bi bi-trash3-fill"></i>
@@ -63,31 +72,25 @@
             </div>
             <div class="modal-body">
 
-                <!-- ID: OMITIDO si es autogenerado -->
-
-                <!-- Seleccionar Maquina -->
                 <div class="form-floating mb-3">
-                    <select class="form-select" name="maquina.id" required>
+                    <select class="form-select" name="idMaquina" required>
                         <option th:each="m : ${maquinas}" th:value="${m.id}" th:text="${m.nombre}"></option>
                     </select>
                     <label>Máquina</label>
                 </div>
 
-                <!-- Seleccionar Tipo -->
                 <div class="form-floating mb-3">
-                    <select class="form-select" name="tipo.id" required>
+                    <select class="form-select" name="idTipo" required>
                         <option th:each="t : ${tipos}" th:value="${t.id}" th:text="${t.nombre}"></option>
                     </select>
                     <label>Tipo Mantenimiento</label>
                 </div>
 
-                <!-- Fecha -->
                 <div class="form-floating mb-3">
-                    <input type="date" class="form-control" name="fechaMantenimiento" required>
+                    <input type="date" class="form-control" name="fecha" required>
                     <label>Fecha de Mantenimiento</label>
                 </div>
 
-                <!-- Descripción -->
                 <div class="form-floating mb-3">
                     <textarea class="form-control" name="descripcion" style="height: 100px"></textarea>
                     <label>Descripción</label>
@@ -102,7 +105,67 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR MANTENIMIENTO -->
+<div class="modal fade" id="modalEditarMantenimiento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formEditarMantenimiento" th:action="@{/mantenimientos/actualizar/__id__}" method="post" class="modal-content">
+            <div class="modal-header modal-header-warning">
+                <h5 class="modal-title">Editar Mantenimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+                <input type="hidden" name="id" id="editId">
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" name="idMaquina" id="editMaquina" required>
+                        <option th:each="m : ${maquinas}" th:value="${m.id}" th:text="${m.nombre}"></option>
+                    </select>
+                    <label>Máquina</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" name="idTipo" id="editTipo" required>
+                        <option th:each="t : ${tipos}" th:value="${t.id}" th:text="${t.nombre}"></option>
+                    </select>
+                    <label>Tipo Mantenimiento</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="date" class="form-control" name="fecha" id="editFecha" required>
+                    <label>Fecha de Mantenimiento</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <textarea class="form-control" name="descripcion" id="editDescripcion" style="height: 100px"></textarea>
+                    <label>Descripción</label>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="fragmentos :: footer"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const modalEditar = document.getElementById('modalEditarMantenimiento');
+    modalEditar.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        document.getElementById('editId').value = button.getAttribute('data-id');
+        document.getElementById('editMaquina').value = button.getAttribute('data-idmaquina');
+        document.getElementById('editTipo').value = button.getAttribute('data-idtipo');
+        document.getElementById('editFecha').value = button.getAttribute('data-fecha');
+        document.getElementById('editDescripcion').value = button.getAttribute('data-descripcion');
+        document.getElementById('formEditarMantenimiento').action = '/mantenimientos/actualizar/' + button.getAttribute('data-id');
+    });
+</script>
 
 </body>
 </html>

@@ -10,4 +10,6 @@ public interface TipoMantenimientoService {
     TipoMantenimiento guardar(TipoMantenimiento tipo);
     TipoMantenimiento actualizar(Long id, TipoMantenimiento tipo);
     void eliminar(Long id);
+
+    List<TipoMantenimiento> buscarPorNombre(String nombre);
 }

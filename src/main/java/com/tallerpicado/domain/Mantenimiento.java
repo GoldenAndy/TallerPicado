@@ -2,8 +2,7 @@ package com.tallerpicado.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "MANTENIMIENTO")
@@ -11,22 +10,19 @@ import java.util.Date;
 public class Mantenimiento {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_MANTENIMIENTO")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_MAQUINA", nullable = false)
-    private Maquinaria maquina;
+    @Column(name = "ID_MAQUINA", nullable = false)
+    private Long idMaquina;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_TIPO", nullable = false)
-    private TipoMantenimiento tipo;
+    @Column(name = "ID_TIPO", nullable = false)
+    private Long idTipo;
 
-    @Column(name = "FECHA_MANTENIMIENTO")
-    @Temporal(TemporalType.DATE)
-    private Date fechaMantenimiento;
+    @Column(name = "FECHA_MANTENIMIENTO", nullable = false)
+    private LocalDate fecha;
 
+    @Lob
     @Column(name = "DESCRIPCION")
     private String descripcion;
 }
