@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/articulos")
-public class ArticuloVistaController {
+public class ArticuloController {
 
     @Autowired
     private ArticuloService articuloService;
@@ -17,7 +17,7 @@ public class ArticuloVistaController {
     @GetMapping("")
     public String listarArticulos(Model model) {
         model.addAttribute("articulos", articuloService.obtenerTodos());
-        return "articulos";  // Debe coincidir con el nombre del archivo .html en templates
+        return "articulos";
     }
 
     @PostMapping("/guardar")
