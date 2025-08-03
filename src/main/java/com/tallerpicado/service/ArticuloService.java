@@ -1,9 +1,9 @@
 package com.tallerpicado.service;
 
+import com.tallerpicado.domain.Articulo;
+
 import java.util.List;
 import java.util.Optional;
-
-import com.tallerpicado.domain.Articulo;
 
 public interface ArticuloService {
     List<Articulo> obtenerTodos();

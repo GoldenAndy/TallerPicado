@@ -153,4 +153,34 @@ public String actualizarOrden(@PathVariable Long id,
         }).collect(Collectors.toList());
         return ResponseEntity.ok(respuesta);
     }
+    
+    
+    @GetMapping("/filtros")
+    public String filtrarOrdenes(@RequestParam(required = false) String cliente,
+                                 @RequestParam(required = false) String estado,
+                                 Model model) {
+
+        List<OrdenTrabajo> ordenesFiltradas;
+
+        boolean clientePresente = cliente != null && !cliente.isBlank();
+        boolean estadoPresente = estado != null && !estado.isBlank();
+
+        if (clientePresente && estadoPresente) {
+            ordenesFiltradas = ordenTrabajoService.buscarPorClienteYEstado(cliente, estado);
+        } else if (clientePresente) {
+            ordenesFiltradas = ordenTrabajoService.buscarPorNombreCliente(cliente);
+        } else if (estadoPresente) {
+            ordenesFiltradas = ordenTrabajoService.buscarPorEstado(estado);
+        } else {
+            ordenesFiltradas = ordenTrabajoService.obtenerTodas(); // sin filtro
+        }
+
+        model.addAttribute("ordenes", ordenesFiltradas);
+        model.addAttribute("estados", Arrays.asList("PENDIENTE", "EN_PROCESO", "FINALIZADA", "ENTREGADA"));
+        model.addAttribute("cliente", cliente);
+        model.addAttribute("estado", estado);
+
+        return "ordenes";
+    }
+
 }

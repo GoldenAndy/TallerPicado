@@ -1,50 +1,97 @@
 package com.tallerpicado.controller;
 
+import com.tallerpicado.domain.Maquinaria;
+import com.tallerpicado.domain.OrdenTrabajo;
 import com.tallerpicado.domain.Produccion;
+import com.tallerpicado.service.MaquinariaService;
+import com.tallerpicado.service.OrdenTrabajoService;
 import com.tallerpicado.service.ProduccionService;
+import org.springframework.format.annotation.DateTimeFormat;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.stereotype.Controller;
 
 @Controller
 @RequestMapping("/produccion")
-@CrossOrigin(origins = "*")
 public class ProduccionController {
 
     @Autowired
     private ProduccionService produccionService;
 
-    
-    @GetMapping("/produccion")
-    public String mostrarVista() {
-        return "produccion"; // apunta a templates/produccion.html
+    @Autowired
+    private MaquinariaService maquinariaService;
+
+    @Autowired
+    private OrdenTrabajoService OrdenTrabajoService;
+
+    // Mostrar producciones por orden
+    @GetMapping("/orden/{idOrden}")
+    public String verProduccionPorOrden(@PathVariable Long idOrden, Model model) {
+        List<Produccion> producciones = produccionService.buscarPorOrden(idOrden);
+        List<Maquinaria> maquinasDisponibles = maquinariaService.obtenerPorEstado("DISPONIBLE");
+
+        model.addAttribute("idOrden", idOrden);
+        model.addAttribute("producciones", producciones);
+        model.addAttribute("maquinas", maquinasDisponibles);
+
+        return "produccion";
     }
 
-    @GetMapping
-    public List<Produccion> listar() {
-        return produccionService.obtenerTodas();
+    // Insertar nueva producción
+    @PostMapping("/guardar")
+    public String guardarProduccion(@RequestParam Long idMaquina,
+                                    @RequestParam Long idOrden) {
+        produccionService.insertarProduccion(idMaquina, idOrden);
+        return "redirect:/produccion/orden/" + idOrden;
     }
 
-    @GetMapping("/{id}")
-    public Optional<Produccion> obtener(@PathVariable Long id) {
-        return produccionService.obtenerPorId(id);
+    // Actualizar producción
+    @PostMapping("/actualizar/{id}")
+    public String actualizarProduccion(@PathVariable Long id,
+                                       @RequestParam Long idMaquina,
+                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaInicio,
+                                       @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaFin,
+                                       @RequestParam String estado,
+                                       @RequestParam Long idOrden) {
+        Produccion p = new Produccion();
+
+        p.setId(id);
+
+        Maquinaria m = new Maquinaria();
+        m.setId(idMaquina);
+        p.setMaquina(m);
+
+        OrdenTrabajo o = new OrdenTrabajo();
+        o.setId(idOrden);
+        p.setOrden(o);
+
+        p.setFechaInicio(fechaInicio);
+        p.setFechaFin(fechaFin);
+        p.setEstado(estado);
+
+        produccionService.actualizarProduccion(p);
+        return "redirect:/produccion/orden/" + idOrden;
     }
 
-    @PostMapping
-    public Produccion crear(@RequestBody Produccion produccion) {
-        return produccionService.guardar(produccion);
-    }
+    // Eliminar producción
+    @GetMapping("/eliminar/{id}")
+    public String eliminarProduccion(@PathVariable Long id) {
+        // Primero buscamos la orden para redirigir correctamente
+        List<Produccion> todas = produccionService.listarTodas();
+        Long idOrden = todas.stream()
+                            .filter(p -> p.getId().equals(id))
+                            .map(p -> p.getOrden().getId())
+                            .findFirst()
+                            .orElse(0L);
 
-    @PutMapping("/{id}")
-    public Produccion actualizar(@PathVariable Long id, @RequestBody Produccion produccion) {
-        return produccionService.actualizar(id, produccion);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        produccionService.eliminar(id);
+        produccionService.eliminarProduccion(id);
+        return "redirect:/produccion/orden/" + idOrden;
     }
 }
+

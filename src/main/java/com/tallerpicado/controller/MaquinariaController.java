@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/maquinaria")
-public class MaquinariaVistaController {
+public class MaquinariaController {
 
     @Autowired
     private MaquinariaService maquinariaService;

@@ -44,6 +44,28 @@
             <i class="bi bi-plus-circle me-1"></i> Nueva Orden
         </button>
     </div>
+    
+    <form class="row g-3 mb-3" th:action="@{/ordenes/filtros}" method="get">
+        <div class="col-md-5">
+            <input type="text" name="cliente" class="form-control" placeholder="Buscar por cliente..." th:value="${cliente}">
+        </div>
+        <div class="col-md-4">
+            <select name="estado" class="form-select">
+                <option value="">-- Estado --</option>
+                <option th:each="e : ${estados}"
+                        th:value="${e}"
+                        th:text="${e}"
+                        th:selected="${estado == e}">
+                </option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100" type="submit">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+    </form>
+
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
@@ -57,8 +79,11 @@
                 <th>Acciones</th>
             </tr>
             </thead>
-            <tbody class="text-center" th:each="orden : ${ordenes}">
-            <tr>
+            <tbody class="text-center">
+            <tr th:if="${ordenes.size() == 0}">
+                <td colspan="6" class="text-muted">No hay órdenes que coincidan con los filtros</td>
+            </tr>
+            <tr th:each="orden : ${ordenes}">
                 <td th:text="${orden.id}">1</td>
                 <td th:text="${#dates.format(orden.fecha, 'yyyy-MM-dd')}">2025-07-10</td>
                 <td th:text="${orden.cliente.nombre}">Juan Pérez</td>
@@ -81,6 +106,7 @@
                 </td>
             </tr>
             </tbody>
+
         </table>
     </div>
 </main>

@@ -12,4 +12,6 @@ public interface MaquinariaService {
     Maquinaria actualizar(Long id, Maquinaria maquinaria);
     void eliminar(Long id);
     List<Maquinaria> buscarPorNombre(String patron);
+    List<Maquinaria> obtenerPorEstado(String estado); /*PARA PRODUCCIÓN — Andrés*/
+
 }

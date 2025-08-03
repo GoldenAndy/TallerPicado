@@ -25,6 +25,8 @@ public class MaquinariaServiceImpl implements MaquinariaService {
     private SimpleJdbcCall actualizarCall;
     private SimpleJdbcCall eliminarCall;
     private SimpleJdbcCall buscarPorNombreCall;
+    private SimpleJdbcCall buscarPorEstadoCall;
+
 
     @PostConstruct
     public void init() {
@@ -56,7 +58,18 @@ public class MaquinariaServiceImpl implements MaquinariaService {
                 .withFunctionName("FN_BUSCAR_MAQUINA_POR_NOMBRE")
                 .declareParameters(new SqlOutParameter("RETURN", Types.REF_CURSOR))
                 .returningResultSet("RETURN", this::mapearMaquinaria);
+        
+        //Buscar por Estado (Producción)
+        buscarPorEstadoCall = new SimpleJdbcCall(jdbcTemplate)
+            .withCatalogName("PAQ_MAQUINARIA")
+            .withFunctionName("FN_BUSCAR_MAQUINA_POR_ESTADO")
+            .declareParameters(new SqlOutParameter("RETURN", Types.REF_CURSOR))
+            .returningResultSet("RETURN", this::mapearMaquinaria);
+
     }
+    
+    
+    
 
     @Override
     public List<Maquinaria> obtenerTodas() {
@@ -111,6 +124,17 @@ public class MaquinariaServiceImpl implements MaquinariaService {
         Map<String, Object> result = buscarPorNombreCall.execute(in);
         return (List<Maquinaria>) result.get("RETURN");
     }
+    
+    
+    
+    @Override
+    public List<Maquinaria> obtenerPorEstado(String estado) {
+        Map<String, Object> in = new HashMap<>();
+        in.put("P_ESTADO", estado);
+        Map<String, Object> result = buscarPorEstadoCall.execute(in);
+        return (List<Maquinaria>) result.get("RETURN");
+    }
+
 
     // Auxiliar para mapear desde ResultSet
     private Maquinaria mapearMaquinaria(ResultSet rs, int rowNum) throws SQLException {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import oracle.jdbc.OracleTypes;
 
 @Service
 public class OrdenTrabajoServiceImpl implements OrdenTrabajoService {
@@ -24,6 +25,10 @@ public class OrdenTrabajoServiceImpl implements OrdenTrabajoService {
     private SimpleJdbcCall insertarCall;
     private SimpleJdbcCall actualizarCall;
     private SimpleJdbcCall eliminarCall;
+    private SimpleJdbcCall buscarPorEstadoCall;
+    private SimpleJdbcCall buscarPorClienteCall;
+    private SimpleJdbcCall buscarPorClienteEstadoCall;
+
 
     @PostConstruct
     private void init() {
@@ -43,6 +48,26 @@ public class OrdenTrabajoServiceImpl implements OrdenTrabajoService {
         eliminarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_ORDENES_TRABAJO")
                 .withProcedureName("SP_ELIMINAR_ORDEN");
+        
+        
+        buscarPorEstadoCall = new SimpleJdbcCall(jdbcTemplate)
+            .withCatalogName("PAQ_ORDENES_TRABAJO")
+            .withFunctionName("FN_BUSCAR_ORDENES_POR_ESTADO")
+            .declareParameters(new SqlOutParameter("RETURN", OracleTypes.CURSOR))
+            .returningResultSet("RETURN", new OrdenTrabajoRowMapper());
+
+        buscarPorClienteCall = new SimpleJdbcCall(jdbcTemplate)
+                .withCatalogName("PAQ_ORDENES_TRABAJO")
+                .withFunctionName("FN_BUSCAR_ORDENES_POR_NOMBRE_CLIENTE")
+                .declareParameters(new SqlOutParameter("RETURN", OracleTypes.CURSOR))
+                .returningResultSet("RETURN", new OrdenTrabajoRowMapper());
+
+        buscarPorClienteEstadoCall = new SimpleJdbcCall(jdbcTemplate)
+                .withCatalogName("PAQ_ORDENES_TRABAJO")
+                .withFunctionName("FN_FILTRAR_ORDENES_CLIENTE_ESTADO")
+                .declareParameters(new SqlOutParameter("RETURN", OracleTypes.CURSOR))
+                .returningResultSet("RETURN", new OrdenTrabajoRowMapper());
+
     }
 
     @Override
@@ -100,6 +125,27 @@ public OrdenTrabajo guardar(OrdenTrabajo orden) {
     public void eliminar(Long id) {
         eliminarCall.execute(Map.of("p_id_orden", id));
     }
+    
+    
+    @Override
+    public List<OrdenTrabajo> buscarPorEstado(String patron) {
+        Map<String, Object> result = buscarPorEstadoCall.execute(Map.of("P_PATRON", patron));
+        return (List<OrdenTrabajo>) result.get("RETURN");
+    }
+
+    @Override
+    public List<OrdenTrabajo> buscarPorNombreCliente(String patron) {
+        Map<String, Object> result = buscarPorClienteCall.execute(Map.of("P_PATRON", patron));
+        return (List<OrdenTrabajo>) result.get("RETURN");
+    }
+
+    @Override
+    public List<OrdenTrabajo> buscarPorClienteYEstado(String nombreCliente, String estado) {
+        Map<String, Object> result = buscarPorClienteEstadoCall.execute(
+                Map.of("P_NOMBRE_CLIENTE", nombreCliente, "P_ESTADO", estado));
+        return (List<OrdenTrabajo>) result.get("RETURN");
+    }
+
 
     // ==============================
     // RowMapper para convertir ResultSet a OrdenTrabajo
