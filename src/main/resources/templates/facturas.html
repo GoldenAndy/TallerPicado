@@ -1,421 +1,173 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Facturas</title>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 20px;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            width: 95%;
-            margin: 20px auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-            border: 1px solid #e0e0e0;
-        }
-        h1 {
-            color: #0056b3;
-            text-align: center;
-            margin-bottom: 35px;
-            font-size: 2.5em;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        .button-container {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-            margin-right: 5px;
-        }
-        .btn-success:hover {
-            background-color: #218838;
-            transform: translateY(-1px);
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-            transform: translateY(-1px);
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            transform: translateY(-2px);
-        }
-        .btn-info { /* Nuevo estilo para el botón "Ver Detalles" */
-            background-color: #17a2b8;
-            color: white;
-            margin-right: 5px; /* Espacio para separar de otros botones */
-        }
-        .btn-info:hover {
-            background-color: #138496;
-            transform: translateY(-1px);
-        }
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 25px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 14px 18px;
-            text-align: left;
-            vertical-align: middle;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9em;
-        }
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        tr:hover {
-            background-color: #e9ecef;
-            cursor: pointer;
-        }
-        .no-data {
-            text-align: center;
-            padding: 30px;
-            color: #6c757d;
-            font-size: 1.1em;
-            background-color: #fdfdfd;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px dashed #ced4da;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Estilos para el Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
-            position: relative;
-            animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        select {
-            width: calc(100% - 20px);
-            padding: 12px 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1em;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus,
-        select:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-        }
-        .form-actions-modal {
-            text-align: right;
-            margin-top: 30px;
-        }
-        .form-actions-modal .btn {
-            margin-left: 10px;
-        }
-        /* Mensajes flash */
-        .alert {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Responsividad */
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr {
-                border: 1px solid #e0e0e0;
-                margin-bottom: 15px;
-                border-radius: 8px;
-            }
-            td {
-                border: none;
-                border-bottom: 1px solid #e0e0e0;
-                position: relative;
-                padding-left: 50%;
-                text-align: right;
-            }
-            td:before {
-                position: absolute;
-                top: 0;
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
-                color: #555;
-            }
-            td:nth-of-type(1):before { content: "ID Factura:"; }
-            td:nth-of-type(2):before { content: "Cliente:"; }
-            td:nth-of-type(3):before { content: "Empleado:"; }
-            td:nth-of-type(4):before { content: "Fecha Emisión:"; }
-            td:nth-of-type(5):before { content: "Total:"; }
-            td:nth-of-type(6):before { content: "Acciones:"; }
-            .button-container {
-                text-align: center;
-            }
-            .action-buttons {
-                justify-content: flex-end;
-                padding-right: 10px;
-            }
-            .modal-content {
-                width: 90%;
-                padding: 20px;
-            }
-            input[type="text"],
-            input[type="number"],
-            input[type="date"],
-            select {
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Listado de Facturas</h1>
-
-        <div class="button-container">
-            <button id="openAddModalBtn" class="btn btn-primary">Agregar Nueva Factura</button>
-        </div>
-
-        <div th:if="${mensajeExito}" class="alert alert-success">
-            <p th:text="${mensajeExito}"></p>
-        </div>
-        <div th:if="${mensajeError}" class="alert alert-danger">
-            <p th:text="${mensajeError}"></p>
-        </div>
-
-        <table th:if="${!facturas.isEmpty()}">
-            <thead>
-                <tr>
-                    <th>ID Factura</th>
-                    <th>Cliente</th>
-                    <th>Empleado</th>
-                    <th>Fecha Emisión</th>
-                    <th>Total</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="factura : ${facturas}">
-                    <td th:text="${factura.id}"></td>
-                    <td th:text="${factura.cliente != null ? factura.cliente.nombre : 'N/A'}"></td>
-                    <td th:text="${factura.empleado != null ? factura.empleado.nombre : 'N/A'}"></td>
-                    <td th:text="${#dates.format(factura.fechaEmision, 'dd/MM/yyyy')}"></td>
-                    <td th:text="${#numbers.formatDecimal(factura.total, 0, 'COMMA', 2, 'POINT')}"></td>
-                    <td>
-                        <div class="action-buttons">
-                            <!-- Botón para ver detalles de la factura específica -->
-                            <a th:href="@{'/facturas-web/' + ${factura.id} + '/detalles'}" class="btn btn-info">Ver Detalles</a>
-                            <a th:href="@{'/facturas-web/editar/' + ${factura.id}}" class="btn btn-success">Actualizar</a>
-                            <a th:href="@{'/facturas-web/eliminar/' + ${factura.id}}" class="btn btn-danger">Eliminar</a>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div th:if="${facturas.isEmpty()}" class="no-data">
-            <p>No hay facturas para mostrar en este momento.</p>
-        </div>
-    </div>
-
-    <!-- Modal para Agregar/Editar Factura -->
-    <div id="addEditInvoiceModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h1 id="modalTitle">Nueva Factura</h1>
-
-            <form th:action="@{/facturas-web/guardar}" th:object="${factura}" method="post">
-                <input type="hidden" th:field="*{id}" />
-
-                <div class="form-group">
-                    <label for="fechaEmision">Fecha de Emisión:</label>
-                    <input type="date" id="fechaEmision" th:field="*{fechaEmision}" required />
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gestión de Facturas</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    </head>
+    <body class="d-flex flex-column min-vh-100 bg-light">
+        
+        <div th:replace="fragmentos :: header"></div>
+        
+        <section class="container mt-4">
+            <form class="row gy-2 gx-3 align-items-center" method="get" th:action="@{/facturas/buscar}">
+                <div class="col-sm-5">
+                    <input type="text" name="cliente" class="form-control" placeholder="Buscar por nombre del cliente">
                 </div>
-
-                <div class="form-group">
-                    <label for="cliente">Cliente:</label>
-                    <select id="cliente" th:field="*{cliente.id}" required>
-                        <option value="">-- Seleccione un Cliente --</option>
-                        <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nombre}"></option>
-                    </select>
+                <div class="col-sm-5">
+                    <input type="text" name="idFactura" class="form-control" placeholder="Buscar por ID de factura">
                 </div>
-
-                <div class="form-group">
-                    <label for="empleado">Empleado:</label>
-                    <select id="empleado" th:field="*{empleado.id}" required>
-                        <option value="">-- Seleccione un Empleado --</option>
-                        <option th:each="emp : ${empleados}" th:value="${emp.id}" th:text="${emp.nombre}"></option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="total">Total:</label>
-                    <input type="number" id="total" th:field="*{total}" step="0.01" required />
-                </div>
-
-                <div class="form-actions-modal">
-                    <button type="submit" class="btn btn-primary">Guardar Factura</button>
-                    <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancelar</button>
+                <div class="col-sm-auto">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                    <a th:href="@{/facturas}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i></a>
                 </div>
             </form>
+        </section>
+        
+        <main class="container bg-white p-4 shadow rounded my-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="titulo-seccion">📄 Facturas Emitidas</h2>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaFactura">
+                    <i class="bi bi-plus-circle"></i> Nueva Factura
+                </button>
+            </div>
+            
+            <div th:if="${facturas != null and #lists.isEmpty(facturas)}" class="alert alert-warning text-center">
+                <i class="bi bi-exclamation-triangle"></i> No se encontraron facturas.
+            </div>
+            
+            <div th:if="${facturas != null}" class="table-responsive">
+                <table class="table table-hover text-center align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Empleado</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="factura : ${facturas}">
+                            <td th:text="${factura.id}"></td>
+                            <td th:text="${#dates.format(factura.fechaEmision, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${factura.cliente.nombre}"></td>
+                            <td th:text="${factura.empleado.nombre}"></td>
+                            <td th:text="${factura.total}"></td>
+                            <td>
+                                <a th:href="@{'/facturas/detalles/' + ${factura.id}}" class="btn btn-info btn-sm me-1" title="Ver Detalles">
+                                    <i class="bi bi-list-task"></i>
+                                </a>
+                                <button class="btn btn-warning btn-sm me-1"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditarFactura"
+                                        th:attr="data-id=${factura.id},
+                                        data-fecha=${#dates.format(factura.fechaEmision, 'yyyy-MM-dd')},
+                                        data-idcliente=${factura.cliente.id},
+                                        data-idempleado=${factura.empleado.id},
+                                        data-total=${factura.total}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <a th:href="@{'/facturas/eliminar/' + ${factura.id}}" class="btn btn-danger btn-sm"
+                                   onclick="return confirm('¿Deseas eliminar esta factura?');">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        
+        <div class="modal fade" id="modalNuevaFactura" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form th:action="@{/facturas/guardar}" method="post" class="modal-content">
+                    <div class="modal-header modal-header-success">
+                        <h5 class="modal-title">Registrar Factura</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="date" name="fechaEmision" class="form-control" id="fecha" required>
+                            <label for="fecha">Fecha de Emisión</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select name="idCliente" class="form-select" required>
+                                <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}"></option>
+                            </select>
+                            <label>Cliente</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select name="idEmpleado" class="form-select" required>
+                                <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
+                            </select>
+                            <label>Empleado</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="number" step="0.01" name="total" class="form-control" required>
+                            <label>Total (₡)</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+        
+        <div class="modal fade" id="modalEditarFactura" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="formEditarFactura" th:action="@{/facturas/actualizar/__id__}" method="post" class="modal-content">
+                    <div class="modal-header modal-header-warning">
+                        <h5 class="modal-title">Editar Factura</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="date" name="fechaEmision" class="form-control" id="editFecha" required>
+                            <label for="editFecha">Fecha de Emisión</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select name="idCliente" class="form-select" id="editCliente" required>
+                                <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}"></option>
+                            </select>
+                            <label for="editCliente">Cliente</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select name="idEmpleado" class="form-select" id="editEmpleado" required>
+                                <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
+                            </select>
+                            <label for="editEmpleado">Empleado</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="number" step="0.01" name="total" class="form-control" id="editTotal" required>
+                            <label for="editTotal">Total (₡)</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning">Actualizar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div th:replace="fragmentos :: footer"></div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+                                       const modalEditar = document.getElementById('modalEditarFactura');
+                                       modalEditar.addEventListener('show.bs.modal', function (event) {
+                                           const button = event.relatedTarget;
+                                           document.getElementById('editFecha').value = button.getAttribute('data-fecha');
+                                           document.getElementById('editCliente').value = button.getAttribute('data-idcliente');
+                                           document.getElementById('editEmpleado').value = button.getAttribute('data-idempleado');
+                                           document.getElementById('editTotal').value = button.getAttribute('data-total');
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        var modal = document.getElementById("addEditInvoiceModal");
-        var btn = document.getElementById("openAddModalBtn");
-        var span = document.getElementsByClassName("close-button")[0];
-        var cancelBtn = document.getElementById("cancelModalBtn");
-
-        btn.onclick = function() {
-            modal.style.display = "flex";
-            document.getElementById("modalTitle").innerText = "Nueva Factura";
-            document.querySelector("#addEditInvoiceModal form").reset();
-            document.querySelector("#addEditInvoiceModal input[type='hidden']").value = "";
-            document.querySelector("#addEditInvoiceModal form").action = /*[[@{/facturas-web/guardar}]]*/ "/facturas-web/guardar";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        cancelBtn.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-        /*]]>*/
-    </script>
-</body>
+                                           document.getElementById('formEditarFactura').action = '/facturas/actualizar/' + button.getAttribute('data-id');
+                                       });
+        </script>
+    </body>
 </html>

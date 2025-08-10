@@ -2,12 +2,15 @@ package com.tallerpicado.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
+import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "FACTURAS")
 @Data
+@NoArgsConstructor
+
 public class Factura {
 
     @Id
@@ -17,6 +20,7 @@ public class Factura {
 
     @Column(name = "FECHA_EMISION")
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date fechaEmision;
 
     @ManyToOne
@@ -29,4 +33,8 @@ public class Factura {
 
     @Column(name = "TOTAL")
     private Double total;
+
+    public Factura(Long id) {
+        this.id = id;
+    }
 }
