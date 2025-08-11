@@ -1,173 +1,193 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>Gestión de Facturas</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    </head>
-    <body class="d-flex flex-column min-vh-100 bg-light">
-        
-        <div th:replace="fragmentos :: header"></div>
-        
-        <section class="container mt-4">
-            <form class="row gy-2 gx-3 align-items-center" method="get" th:action="@{/facturas/buscar}">
-                <div class="col-sm-5">
-                    <input type="text" name="cliente" class="form-control" placeholder="Buscar por nombre del cliente">
-                </div>
-                <div class="col-sm-5">
-                    <input type="text" name="idFactura" class="form-control" placeholder="Buscar por ID de factura">
-                </div>
-                <div class="col-sm-auto">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
-                    <a th:href="@{/facturas}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i></a>
-                </div>
-            </form>
-        </section>
-        
-        <main class="container bg-white p-4 shadow rounded my-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="titulo-seccion">📄 Facturas Emitidas</h2>
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaFactura">
-                    <i class="bi bi-plus-circle"></i> Nueva Factura
-                </button>
-            </div>
-            
-            <div th:if="${facturas != null and #lists.isEmpty(facturas)}" class="alert alert-warning text-center">
-                <i class="bi bi-exclamation-triangle"></i> No se encontraron facturas.
-            </div>
-            
-            <div th:if="${facturas != null}" class="table-responsive">
-                <table class="table table-hover text-center align-middle">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>ID</th>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Empleado</th>
-                            <th>Total</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="factura : ${facturas}">
-                            <td th:text="${factura.id}"></td>
-                            <td th:text="${#dates.format(factura.fechaEmision, 'dd/MM/yyyy')}"></td>
-                            <td th:text="${factura.cliente.nombre}"></td>
-                            <td th:text="${factura.empleado.nombre}"></td>
-                            <td th:text="${factura.total}"></td>
-                            <td>
-                                <a th:href="@{'/facturas/detalles/' + ${factura.id}}" class="btn btn-info btn-sm me-1" title="Ver Detalles">
-                                    <i class="bi bi-list-task"></i>
-                                </a>
-                                <button class="btn btn-warning btn-sm me-1"
-                                        data-bs-toggle="modal" data-bs-target="#modalEditarFactura"
-                                        th:attr="data-id=${factura.id},
-                                        data-fecha=${#dates.format(factura.fechaEmision, 'yyyy-MM-dd')},
-                                        data-idcliente=${factura.cliente.id},
-                                        data-idempleado=${factura.empleado.id},
-                                        data-total=${factura.total}">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                                <a th:href="@{'/facturas/eliminar/' + ${factura.id}}" class="btn btn-danger btn-sm"
-                                   onclick="return confirm('¿Deseas eliminar esta factura?');">
-                                    <i class="bi bi-trash3-fill"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </main>
-        
-        <div class="modal fade" id="modalNuevaFactura" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <form th:action="@{/facturas/guardar}" method="post" class="modal-content">
-                    <div class="modal-header modal-header-success">
-                        <h5 class="modal-title">Registrar Factura</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating mb-3">
-                            <input type="date" name="fechaEmision" class="form-control" id="fecha" required>
-                            <label for="fecha">Fecha de Emisión</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select name="idCliente" class="form-select" required>
-                                <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}"></option>
-                            </select>
-                            <label>Cliente</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select name="idEmpleado" class="form-select" required>
-                                <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
-                            </select>
-                            <label>Empleado</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="number" step="0.01" name="total" class="form-control" required>
-                            <label>Total (₡)</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Guardar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div class="modal fade" id="modalEditarFactura" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <form id="formEditarFactura" th:action="@{/facturas/actualizar/__id__}" method="post" class="modal-content">
-                    <div class="modal-header modal-header-warning">
-                        <h5 class="modal-title">Editar Factura</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-floating mb-3">
-                            <input type="date" name="fechaEmision" class="form-control" id="editFecha" required>
-                            <label for="editFecha">Fecha de Emisión</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select name="idCliente" class="form-select" id="editCliente" required>
-                                <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}"></option>
-                            </select>
-                            <label for="editCliente">Cliente</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select name="idEmpleado" class="form-select" id="editEmpleado" required>
-                                <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
-                            </select>
-                            <label for="editEmpleado">Empleado</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="number" step="0.01" name="total" class="form-control" id="editTotal" required>
-                            <label for="editTotal">Total (₡)</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-warning">Actualizar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-        <div th:replace="fragmentos :: footer"></div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-                                       const modalEditar = document.getElementById('modalEditarFactura');
-                                       modalEditar.addEventListener('show.bs.modal', function (event) {
-                                           const button = event.relatedTarget;
-                                           document.getElementById('editFecha').value = button.getAttribute('data-fecha');
-                                           document.getElementById('editCliente').value = button.getAttribute('data-idcliente');
-                                           document.getElementById('editEmpleado').value = button.getAttribute('data-idempleado');
-                                           document.getElementById('editTotal').value = button.getAttribute('data-total');
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Facturas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+  <style>
+    body{display:flex;flex-direction:column;min-height:100vh}
+    main{flex:1}
+  </style>
+</head>
+<body class="bg-light">
 
-                                           document.getElementById('formEditarFactura').action = '/facturas/actualizar/' + button.getAttribute('data-id');
-                                       });
-        </script>
-    </body>
+<!-- HEADER -->
+<div th:replace="fragmentos :: header"></div>
+
+<!-- BUSCADOR -->
+<section class="container mt-4">
+  <form class="row gy-2 gx-3 align-items-center" method="get" th:action="@{/facturas/buscar}">
+    <div class="col-sm-5">
+      <input type="text" name="cliente" class="form-control" placeholder="Buscar por nombre del cliente">
+    </div>
+    <div class="col-sm-5">
+      <input type="text" name="idFactura" class="form-control" placeholder="Buscar por ID de factura">
+    </div>
+    <div class="col-sm-auto">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+      <a th:href="@{/facturas}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i></a>
+    </div>
+  </form>
+</section>
+
+<main class="container bg-white p-4 shadow rounded my-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="titulo-seccion">📄 Facturas Emitidas</h2>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaFactura">
+      <i class="bi bi-plus-circle"></i> Nueva Factura
+    </button>
+  </div>
+
+  <div th:if="${facturas != null and #lists.isEmpty(facturas)}" class="alert alert-warning text-center">
+    <i class="bi bi-exclamation-triangle"></i> No se encontraron facturas.
+  </div>
+
+  <div th:if="${facturas != null}" class="table-responsive">
+    <table class="table table-hover text-center align-middle">
+      <thead class="table-primary">
+      <tr>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Empleado</th>
+        <th>Total</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="factura : ${facturas}">
+        <td th:text="${factura.id}">1</td>
+        <td th:text="${#dates.format(factura.fechaEmision, 'dd/MM/yyyy')}">01/01/2025</td>
+        <td th:text="${factura.cliente != null ? factura.cliente.nombre : '—'}">Cliente</td>
+        <td th:text="${factura.empleado != null ? factura.empleado.nombre : '—'}">Empleado</td>
+        <td>
+          ₡ <span th:text="${#numbers.formatDecimal(factura.total,1,'COMMA',2,'POINT')}">0.00</span>
+        </td>
+        <td>
+            <!-- Detalles -->
+            <a th:href="@{'/facturas/detalles/' + ${factura.id}}"
+               class="btn btn-info btn-sm me-1" title="Ver Detalles">
+                <i class="bi bi-list-task"></i>
+            </a>
+
+            <!-- Editar -->
+            <button class="btn btn-warning btn-sm me-1"
+                    data-bs-toggle="modal" data-bs-target="#modalEditarFactura"
+                    th:attr="data-id=${factura.id},
+                    data-fecha=${#dates.format(factura.fechaEmision, 'yyyy-MM-dd')},
+                    data-idcliente=${factura.cliente.id},
+                    data-idempleado=${factura.empleado.id}">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <!-- Eliminar -->
+            <a th:href="@{'/facturas/eliminar/' + ${factura.id}}"
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('¿Deseas eliminar esta factura?');">
+                <i class="bi bi-trash3-fill"></i>
+            </a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- MODAL: Nueva Factura (no pide total) -->
+<div class="modal fade" id="modalNuevaFactura" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form th:action="@{/facturas/guardar}" method="post" class="modal-content">
+      <div class="modal-header modal-header-success">
+        <h5 class="modal-title">Registrar Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="date" name="fechaEmision" class="form-control" id="fecha" required>
+          <label for="fecha">Fecha de Emisión</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select name="idCliente" class="form-select" required>
+            <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}">Cliente</option>
+          </select>
+          <label>Cliente</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select name="idEmpleado" class="form-select" required>
+            <option th:each="empleado : ${empleados}" th:value="${empleado.id}"
+                    th:text="${empleado.nombre + ' ' + empleado.apellido}">Empleado</option>
+          </select>
+          <label>Empleado</label>
+        </div>
+        <div class="alert alert-info">
+          El total se calculará automáticamente al agregar detalles.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Editar Factura (sin total) -->
+<div class="modal fade" id="modalEditarFactura" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formEditarFactura" th:action="@{/facturas/actualizar/__id__}" method="post" class="modal-content">
+      <div class="modal-header modal-header-warning">
+        <h5 class="modal-title">Editar Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="date" name="fechaEmision" class="form-control" id="editFecha" required>
+          <label for="editFecha">Fecha de Emisión</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select name="idCliente" class="form-select" id="editCliente" required>
+            <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}">Cliente</option>
+          </select>
+          <label for="editCliente">Cliente</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select name="idEmpleado" class="form-select" id="editEmpleado" required>
+            <option th:each="empleado : ${empleados}" th:value="${empleado.id}"
+                    th:text="${empleado.nombre + ' ' + empleado.apellido}">Empleado</option>
+          </select>
+          <label for="editEmpleado">Empleado</label>
+        </div>
+        <div class="alert alert-secondary">
+          El total se mantiene por los detalles (no editable aquí).
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-warning">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div th:replace="fragmentos :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Completa el modal de edición
+  const modalEditar = document.getElementById('modalEditarFactura');
+  modalEditar.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('editFecha').value = button.getAttribute('data-fecha');
+    document.getElementById('editCliente').value = button.getAttribute('data-idcliente');
+    document.getElementById('editEmpleado').value = button.getAttribute('data-idempleado');
+
+    const id = button.getAttribute('data-id');
+    document.getElementById('formEditarFactura').action = '/facturas/actualizar/' + id;
+  });
+</script>
+</body>
 </html>

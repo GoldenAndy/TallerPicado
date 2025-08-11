@@ -8,10 +8,13 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 @Service
@@ -21,104 +24,132 @@ public class FacturaServiceImpl implements FacturaService {
     private JdbcTemplate jdbcTemplate;
 
     private SimpleJdbcCall listarCall, insertarCall, actualizarCall, eliminarCall;
-    private SimpleJdbcCall buscarPorClienteCall, buscarPorIdCall;
+    private SimpleJdbcCall buscarPorClienteFn, buscarPorIdFn;
+    private SimpleJdbcCall obtenerPorIdCall;
 
     @PostConstruct
     private void init() {
+        // LISTAR
         listarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withProcedureName("SP_LISTAR_FACTURAS")
                 .returningResultSet("p_resultado", new FacturaRowMapper());
 
+        // INSERTAR (sin total, OUT id)
         insertarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
-                .withProcedureName("SP_INSERTAR_FACTURA");
+                .withProcedureName("SP_INSERTAR_FACTURA")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("p_fecha", Types.DATE),
+                        new SqlParameter("p_id_cliente", Types.NUMERIC),
+                        new SqlParameter("p_id_empleado", Types.NUMERIC),
+                        new SqlOutParameter("p_id_factura", Types.NUMERIC)
+                );
 
+        // ACTUALIZAR (sin total)
         actualizarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
-                .withProcedureName("SP_ACTUALIZAR_FACTURA");
+                .withProcedureName("SP_ACTUALIZAR_FACTURA")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("p_id_factura", Types.NUMERIC),
+                        new SqlParameter("p_fecha", Types.DATE),
+                        new SqlParameter("p_id_cliente", Types.NUMERIC),
+                        new SqlParameter("p_id_empleado", Types.NUMERIC)
+                );
 
+        // ELIMINAR
         eliminarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
-                .withProcedureName("SP_ELIMINAR_FACTURA");
+                .withProcedureName("SP_ELIMINAR_FACTURA")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(new SqlParameter("p_id_factura", Types.NUMERIC));
 
-        buscarPorClienteCall = new SimpleJdbcCall(jdbcTemplate)
+        // FUNCIONES de búsqueda (retornan SYS_REFCURSOR)
+        buscarPorClienteFn = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withFunctionName("FN_BUSCAR_FACTURAS_POR_CLIENTE")
-                .returningResultSet("return", new FacturaRowMapper());
+                .returningResultSet("RETURN_VALUE", new FacturaRowMapper());
 
-        buscarPorIdCall = new SimpleJdbcCall(jdbcTemplate)
+        buscarPorIdFn = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withFunctionName("FN_BUSCAR_FACTURAS_POR_ID")
-                .returningResultSet("return", new FacturaRowMapper());
+                .returningResultSet("RETURN_VALUE", new FacturaRowMapper());
+        
+        
+        obtenerPorIdCall = new SimpleJdbcCall(jdbcTemplate)
+                .withCatalogName("PAQ_FACTURAS")
+                .withProcedureName("SP_OBTENER_FACTURA_POR_ID")
+                .returningResultSet("p_resultado", new FacturaRowMapper());
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Factura> listarTodas() {
         Map<String, Object> result = listarCall.execute();
         return (List<Factura>) result.get("p_resultado");
     }
 
     @Override
-    public void insertar(Factura factura) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("p_fecha", factura.getFechaEmision());
-        params.put("p_id_cliente", factura.getCliente().getId());
-        params.put("p_id_empleado", factura.getEmpleado().getId());
-        params.put("p_total", factura.getTotal());
+    public Long insertar(Factura factura) {
+        MapSqlParameterSource in = new MapSqlParameterSource()
+                .addValue("p_fecha", factura.getFechaEmision())
+                .addValue("p_id_cliente", factura.getCliente().getId())
+                .addValue("p_id_empleado", factura.getEmpleado().getId());
 
-        insertarCall.execute(params);
+        Map<String, Object> out = insertarCall.execute(in);
+        Number id = (Number) out.get("p_id_factura");
+        return id != null ? id.longValue() : null;
     }
 
     @Override
     public void actualizar(Long idFactura, Factura factura) {
-        actualizarCall.execute(
-                Map.of(
-                        "p_id_factura", idFactura,
-                        "p_fecha", factura.getFechaEmision(),
-                        "p_id_cliente", factura.getCliente().getId(),
-                        "p_id_empleado", factura.getEmpleado().getId(),
-                        "p_total", factura.getTotal()
-                )
-        );
+        MapSqlParameterSource in = new MapSqlParameterSource()
+                .addValue("p_id_factura", idFactura)
+                .addValue("p_fecha", factura.getFechaEmision())
+                .addValue("p_id_cliente", factura.getCliente().getId())
+                .addValue("p_id_empleado", factura.getEmpleado().getId());
+
+        actualizarCall.execute(in);
     }
 
     @Override
     public void eliminar(Long idFactura) {
-        eliminarCall.execute(Map.of("p_id_factura", idFactura));
+        eliminarCall.execute(new MapSqlParameterSource().addValue("p_id_factura", idFactura));
     }
 
     @Override
     public List<Factura> buscarPorCliente(String patron) {
-        Map<String, Object> result = buscarPorClienteCall.execute(Map.of("p_patron", patron));
-        return (List<Factura>) result.get("return");
+        MapSqlParameterSource in = new MapSqlParameterSource().addValue("p_patron", patron);
+        // El return type es List<Factura> gracias al returningResultSet registrado
+        return buscarPorClienteFn.executeFunction(List.class, in);
     }
 
     @Override
     public List<Factura> buscarPorId(String patron) {
-        Map<String, Object> result = buscarPorIdCall.execute(Map.of("p_patron", patron));
-        return (List<Factura>) result.get("return");
+        MapSqlParameterSource in = new MapSqlParameterSource().addValue("p_patron", patron);
+        return buscarPorIdFn.executeFunction(List.class, in);
     }
 
     @Override
     public Optional<Factura> obtenerPorId(Long id) {
-        String sql = "SELECT F.ID_FACTURA, F.FECHA_EMISION, F.TOTAL, F.ID_CLIENTE, F.ID_EMPLEADO, "
-                + "C.NOMBRE AS NOMBRE_CLIENTE, E.NOMBRE || ' ' || E.APELLIDO AS EMPLEADO "
-                + "FROM FACTURAS F "
-                + "JOIN CLIENTES C ON F.ID_CLIENTE = C.ID_CLIENTE "
-                + "JOIN EMPLEADOS E ON F.ID_EMPLEADO = E.ID_EMPLEADO "
-                + "WHERE F.ID_FACTURA = ?";
+        MapSqlParameterSource in = new MapSqlParameterSource().addValue("p_id_factura", id);
+        @SuppressWarnings("unchecked")
+        var out = (Map<String, Object>) obtenerPorIdCall.execute(in);
+        @SuppressWarnings("unchecked")
+        var list = (List<Factura>) out.get("p_resultado");
 
-        try {
-            Factura factura = jdbcTemplate.queryForObject(sql, new FacturaRowMapper(), id);
-            return Optional.ofNullable(factura);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        if (list == null || list.isEmpty()) return Optional.empty();
+        return Optional.of(list.get(0));
     }
+    
+    
+    
+ 
 
+    // ---------- RowMapper ----------
     private static class FacturaRowMapper implements RowMapper<Factura> {
-
         @Override
         public Factura mapRow(ResultSet rs, int rowNum) throws SQLException {
             Factura f = new Factura();
@@ -128,18 +159,19 @@ public class FacturaServiceImpl implements FacturaService {
 
             Cliente cliente = new Cliente();
             cliente.setId(rs.getLong("ID_CLIENTE"));
-            try {
-                cliente.setNombre(rs.getString("NOMBRE_CLIENTE"));
-            } catch (SQLException ignored) {
-            }
+            try { cliente.setNombre(rs.getString("NOMBRE_CLIENTE")); } catch (SQLException ignored) {}
             f.setCliente(cliente);
 
             Empleado empleado = new Empleado();
             empleado.setId(rs.getLong("ID_EMPLEADO"));
-            try {
-                empleado.setNombre(rs.getString("EMPLEADO"));
-            } catch (SQLException ignored) {
+            // Soporta alias NOMBRE_EMPLEADO o EMPLEADO (por compatibilidad)
+            String empNombre;
+            try { empNombre = rs.getString("NOMBRE_EMPLEADO"); }
+            catch (SQLException e) { empNombre = null; }
+            if (empNombre == null) {
+                try { empNombre = rs.getString("EMPLEADO"); } catch (SQLException ignored) {}
             }
+            empleado.setNombre(empNombre);
             f.setEmpleado(empleado);
 
             return f;

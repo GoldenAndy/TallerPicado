@@ -1,11 +1,8 @@
 package com.tallerpicado.service;
- 
 import com.tallerpicado.domain.DetalleFactura;
 import java.util.List;
- 
-public interface DetalleFacturaService {
- 
 
+public interface DetalleFacturaService {
     Long insertar(DetalleFactura detalle);
     void actualizar(DetalleFactura detalle);
     void eliminar(Long idDetalle);
