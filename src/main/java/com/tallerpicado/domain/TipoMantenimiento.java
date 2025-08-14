@@ -10,7 +10,7 @@ public class TipoMantenimiento {
 
     @Id
     @Column(name = "ID_TIPO")
-    private Long id; // Se debe establecer manualmente ANTES de guardar
+    private Long id;
 
     @Column(name = "NOMBRE", nullable = false, length = 50)
     private String nombre;

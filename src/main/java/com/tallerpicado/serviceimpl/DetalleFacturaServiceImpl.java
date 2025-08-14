@@ -28,7 +28,7 @@ public class DetalleFacturaServiceImpl implements DetalleFacturaService {
     private SimpleJdbcCall spActualizar;
     private SimpleJdbcCall spEliminar;
     private SimpleJdbcCall spListar;
-    private SimpleJdbcCall spBuscar; // wrapper SP_BUSCAR_DETALLE_FACTURA_POR_ARTICULO
+    private SimpleJdbcCall spBuscar;
 
     private final RowMapper<DetalleFactura> rowMapper = new RowMapper<>() {
         @Override
@@ -47,7 +47,7 @@ public class DetalleFacturaServiceImpl implements DetalleFacturaService {
 
     @PostConstruct
     private void init() {
-        // INSERTAR: (p_id_factura IN, p_id_articulo IN, p_cantidad IN, p_id_detalle OUT)
+        // Insertar
         spInsertar = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_DETALLE_FACTURAS")
                 .withProcedureName("SP_CREAR_DETALLE_FACTURA")
@@ -59,7 +59,7 @@ public class DetalleFacturaServiceImpl implements DetalleFacturaService {
                         new SqlOutParameter("p_id_detalle", Types.NUMERIC)
                 );
 
-        // ACTUALIZAR: (p_id_detalle IN, p_id_articulo IN, p_cantidad IN)
+        // Actualizar
         spActualizar = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_DETALLE_FACTURAS")
                 .withProcedureName("SP_ACTUALIZAR_DETALLE_FACTURA")

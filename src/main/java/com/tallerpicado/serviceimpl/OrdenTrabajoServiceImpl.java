@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 import oracle.jdbc.OracleTypes;
 
@@ -47,7 +48,12 @@ public class OrdenTrabajoServiceImpl implements OrdenTrabajoService {
 
         eliminarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_ORDENES_TRABAJO")
-                .withProcedureName("SP_ELIMINAR_ORDEN");
+                .withProcedureName("SP_ELIMINAR_ORDEN")
+                .declareParameters(
+                        new SqlParameter("p_id_orden", Types.NUMERIC),
+                        new SqlParameter("p_confirmar_cascada", Types.NUMERIC),
+                        new SqlOutParameter("p_tenia_producciones", Types.NUMERIC)
+                );
         
         
         buscarPorEstadoCall = new SimpleJdbcCall(jdbcTemplate)
@@ -123,7 +129,17 @@ public OrdenTrabajo guardar(OrdenTrabajo orden) {
 
     @Override
     public void eliminar(Long id) {
-        eliminarCall.execute(Map.of("p_id_orden", id));
+        eliminar(id, 0);
+    }
+
+    @Override
+    public void eliminar(Long id, int confirmar) {
+        eliminarCall.execute(
+            Map.of(
+                "p_id_orden", id,
+                "p_confirmar_cascada", confirmar
+            )
+        );
     }
     
     
@@ -147,9 +163,6 @@ public OrdenTrabajo guardar(OrdenTrabajo orden) {
     }
 
 
-    // ==============================
-    // RowMapper para convertir ResultSet a OrdenTrabajo
-    // ==============================
     private static class OrdenTrabajoRowMapper implements RowMapper<OrdenTrabajo> {
         @Override
         public OrdenTrabajo mapRow(ResultSet rs, int rowNum) throws SQLException {

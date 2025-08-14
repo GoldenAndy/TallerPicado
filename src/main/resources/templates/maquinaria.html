@@ -13,6 +13,20 @@
 <!-- HEADER -->
 <div th:replace="~{fragmentos :: header}"></div>
 
+<!-- Mensajes (flash) -->
+<div class="container mt-3">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
 <!-- CONTENIDO PRINCIPAL -->
 <main class="container bg-white p-4 shadow rounded mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -60,10 +74,12 @@
                                          data-estado=${maq.estado}">
                             <i class="bi bi-pencil-square"></i>
                         </button>
-                        <a th:href="@{'/maquinaria/eliminar/' + ${maq.id}}" 
+                        <a href="#"
                            class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Deseas eliminar esta máquina?');">
-                           <i class="bi bi-trash3-fill"></i>
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarMaquina"
+                           th:attr="data-id=${maq.id}, data-nombre=${maq.nombre}">
+                            <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
                 </tr>
@@ -75,87 +91,133 @@
 <!-- MODAL: Nueva Maquina -->
 <!-- MODAL: Nueva Maquina -->
 <div class="modal fade" id="modalNuevaMaquina" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form th:action="@{/maquinaria/guardar}" method="post" class="modal-content">
-            <div class="modal-header modal-header-success">
-                <h5 class="modal-title">Registrar Nueva Maquinaria</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
+  <div class="modal-dialog">
+    <form th:action="@{/maquinaria/guardar}" method="post" class="modal-content">
+      <div class="modal-header modal-header-success">
+        <h5 class="modal-title">Registrar Nueva Maquinaria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-                <!-- ID Manual -->
-                <div class="form-floating mb-3">
-                    <input type="number" class="form-control" name="id" id="id" required>
-                    <label for="id">ID (único)</label>
-                </div>
+      <div class="modal-body">
 
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="nombre" id="nombre" required>
-                    <label for="nombre">Nombre</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="marca" id="marca">
-                    <label for="marca">Marca</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="date" class="form-control" name="fechaAdquisicion" id="fechaAdquisicion">
-                    <label for="fechaAdquisicion">Fecha de Adquisición</label>
-                </div>
-                <div class="form-floating">
-                    <select class="form-select" name="estado" id="estado">
-                        <option value="DISPONIBLE">DISPONIBLE</option>
-                        <option value="EN_MANTENIMIENTO">EN_MANTENIMIENTO</option>
-                        <option value="FUERA_DE_SERVICIO">FUERA_DE_SERVICIO</option>
-                    </select>
-                    <label for="estado">Estado</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Guardar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
-    </div>
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" name="nombre" id="nombre" required
+                 th:value="${maqNombreIntento}">
+          <label for="nombre">Nombre</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" name="marca" id="marca"
+                 th:value="${maqMarcaIntento}">
+          <label for="marca">Marca</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="date" class="form-control" name="fechaAdquisicion" id="fechaAdquisicion"
+                 th:value="${maqFechaIntento}">
+          <label for="fechaAdquisicion">Fecha de Adquisición</label>
+        </div>
+
+        <div class="form-floating">
+          <select class="form-select" name="estado" id="estado">
+            <option value="DISPONIBLE"
+                    th:selected="${maqEstadoIntento == 'DISPONIBLE'}">DISPONIBLE</option>
+            <option value="EN_MANTENIMIENTO"
+                    th:selected="${maqEstadoIntento == 'EN_MANTENIMIENTO'}">EN_MANTENIMIENTO</option>
+            <option value="FUERA_DE_SERVICIO"
+                    th:selected="${maqEstadoIntento == 'FUERA_DE_SERVICIO'}">FUERA_DE_SERVICIO</option>
+          </select>
+          <label for="estado">Estado</label>
+        </div>
+
+        <!-- Error al CREAR (duplicado/obligatorio/estado) -->
+        <div th:if="${errorNuevoMaq}" class="alert alert-danger alert-dismissible fade show mt-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <span th:text="${errorNuevoMaq}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 
 <!-- MODAL: Editar Maquina -->
 <div class="modal fade" id="modalEditarMaquina" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="formEditarMaquina" th:action="@{/maquinaria/actualizar/__id__}" method="post" class="modal-content">
-            <div class="modal-header modal-header-warning">
-                <h5 class="modal-title">Editar Maquinaria</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="id" id="editId">
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="nombre" id="editNombre" required>
-                    <label for="editNombre">Nombre</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="marca" id="editMarca">
-                    <label for="editMarca">Marca</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="date" class="form-control" name="fechaAdquisicion" id="editFecha">
-                    <label for="editFecha">Fecha de Adquisición</label>
-                </div>
-                <div class="form-floating">
-                    <select class="form-select" name="estado" id="editEstado">
-                        <option value="DISPONIBLE">DISPONIBLE</option>
-                        <option value="EN_MANTENIMIENTO">EN_MANTENIMIENTO</option>
-                        <option value="FUERA_DE_SERVICIO">FUERA_DE_SERVICIO</option>
-                    </select>
-                    <label for="editEstado">Estado</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-warning">Actualizar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
+  <div class="modal-dialog">
+    <form id="formEditarMaquina" th:action="@{/maquinaria/actualizar/__id__}" method="post" class="modal-content">
+      <div class="modal-header modal-header-warning">
+        <h5 class="modal-title">Editar Maquinaria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" name="id" id="editId">
+
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" name="nombre" id="editNombre" required maxlength="100">
+          <label for="editNombre">Nombre</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" name="marca" id="editMarca" maxlength="50">
+          <label for="editMarca">Marca</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="date" class="form-control" name="fechaAdquisicion" id="editFecha">
+          <label for="editFecha">Fecha de Adquisición</label>
+        </div>
+
+        <div class="form-floating">
+          <select class="form-select" name="estado" id="editEstado">
+            <option value="DISPONIBLE">DISPONIBLE</option>
+            <option value="EN_MANTENIMIENTO">EN_MANTENIMIENTO</option>
+            <option value="FUERA_DE_SERVICIO">FUERA_DE_SERVICIO</option>
+          </select>
+          <label for="editEstado">Estado</label>
+        </div>
+
+        <!-- Error al EDITAR (duplicado/obligatorio/estado) -->
+        <div th:if="${errorEditarMaq}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <span th:text="${errorEditarMaq}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-warning">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal Eliminar Máquina -->
+<div class="modal fade" id="modalEliminarMaquina" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vas a eliminar la máquina <strong id="maqDelNombre"></strong>.</p>
+        <p class="mb-0">Si tiene mantenimientos o registros de producción, la operación será bloqueada y verás el motivo arriba en rojo.</p>
+      </div>
+      <div class="modal-footer">
+        <a id="btnConfirmEliminarMaquina" href="#" class="btn btn-danger">Eliminar</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -173,6 +235,61 @@
         document.getElementById('editEstado').value = button.getAttribute('data-estado');
         document.getElementById('formEditarMaquina').action = '/maquinaria/actualizar/' + button.getAttribute('data-id');
     });
+</script>
+
+
+<script>
+  // Modal ELIMINAR máquina
+  const modalEliminarMaquina = document.getElementById('modalEliminarMaquina');
+  if (modalEliminarMaquina) {
+    modalEliminarMaquina.addEventListener('show.bs.modal', function (event) {
+      const btn = event.relatedTarget;
+      const id = btn.getAttribute('data-id');
+      const nombre = btn.getAttribute('data-nombre');
+
+      document.getElementById('maqDelNombre').textContent = nombre || 'esta máquina';
+      document.getElementById('btnConfirmEliminarMaquina')
+              .setAttribute('href', '/maquinaria/eliminar/' + id);
+    });
+  }
+</script>
+
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Reabrir NUEVO si falló (por ejemplo: nombre duplicado)
+  const openNuevoMaq = /*[[${openNuevoMaq}]]*/ false;
+  if (openNuevoMaq) {
+    new bootstrap.Modal(document.getElementById('modalNuevaMaquina')).show();
+  }
+
+  // Reabrir EDITAR si falló
+  const openEditarMaq = /*[[${openEditarMaq}]]*/ false;
+  if (openEditarMaq) {
+    const id     = /*[[${editIdMaq}]]*/ '';
+    const nombre = /*[['' + ${editNombreMaq}]]*/ '';
+    const marca  = /*[['' + ${editMarcaMaq}]]*/ '';
+    const fecha  = /*[['' + ${editFechaMaq}]]*/ '';
+    const estado = /*[['' + ${editEstadoMaq}]]*/ '';
+
+    document.getElementById('editId').value        = id;
+    document.getElementById('editNombre').value    = nombre || '';
+    document.getElementById('editMarca').value     = marca || '';
+    document.getElementById('editFecha').value     = fecha || '';
+    document.getElementById('editEstado').value    = estado || '';
+    document.getElementById('formEditarMaquina').action = '/maquinaria/actualizar/' + id;
+
+    new bootstrap.Modal(document.getElementById('modalEditarMaquina')).show();
+  }
+/*]]>*/
+</script>
+
+
+<script>
+  (function(){ 
+    const alerts = document.querySelectorAll('.alert');
+    setTimeout(() => alerts.forEach(a => new bootstrap.Alert(a).close()), 8000);
+  })();
 </script>
 
 </body>

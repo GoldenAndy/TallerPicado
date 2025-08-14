@@ -27,11 +27,11 @@ public class FacturaController {
     @Autowired private ClienteService clienteService;
     @Autowired private EmpleadoService empleadoService;
 
-    // Para la pantalla de detalles
+
     @Autowired private DetalleFacturaService detalleFacturaService;
     @Autowired private ArticuloService articuloService;
 
-    // ===== Listado =====
+
     @GetMapping("")
     public String listar(Model model) {
         model.addAttribute("facturas", facturaService.listarTodas());
@@ -40,7 +40,7 @@ public class FacturaController {
         return "facturas";
     }
 
-    // ===== Crear (sin total) =====
+
     @PostMapping("/guardar")
     public String guardar(@RequestParam("fechaEmision") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha,
                           @RequestParam("idCliente") Long idCliente,
@@ -58,7 +58,7 @@ public class FacturaController {
         return "redirect:/facturas/detalles/" + nuevoId;
     }
 
-    // ===== Actualizar (sin total) =====
+   
     @PostMapping("/actualizar/{id}")
     public String actualizar(@PathVariable Long id,
                              @RequestParam("fechaEmision") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha,
@@ -77,14 +77,14 @@ public class FacturaController {
         return "redirect:/facturas";
     }
 
-    // ===== Eliminar =====
+
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         facturaService.eliminar(id);
         return "redirect:/facturas";
     }
 
-    // ===== Buscar =====
+
     @GetMapping("/buscar")
     public String buscar(@RequestParam(required = false) String cliente,
                          @RequestParam(required = false) String idFactura,
@@ -103,7 +103,7 @@ public class FacturaController {
         return "facturas";
     }
 
-    // ===== Detalles de factura (ruta: /facturas/detalles/{idFactura}) =====
+
     @GetMapping("/detalles/{idFactura}")
     public String verDetalles(@PathVariable Long idFactura, Model model) {
         Optional<Factura> facturaOpt = facturaService.obtenerPorId(idFactura);
@@ -116,12 +116,12 @@ public class FacturaController {
         model.addAttribute("factura", factura);
         model.addAttribute("detalles", detalles);
         model.addAttribute("articulos", articuloService.obtenerTodos());
-        model.addAttribute("idFactura", idFactura); // útil para forms en la vista
+        model.addAttribute("idFactura", idFactura);
 
         return "detallefactura";
     }
 
-    // ===== Crear detalle (sin precioUnitario) =====
+
     @PostMapping("/detalles/guardar")
     public String guardarDetalle(@RequestParam("idFactura") Long idFactura,
                                  @RequestParam("idArticulo") Long idArticulo,
@@ -131,13 +131,13 @@ public class FacturaController {
         d.setIdFactura(idFactura);
         d.setIdArticulo(idArticulo);
         d.setCantidad(cantidad);
-        // NO seteamos precioUnitario: lo define el package desde ARTICULOS
+
 
         detalleFacturaService.insertar(d);
         return "redirect:/facturas/detalles/" + idFactura;
     }
 
-    // ===== Eliminar detalle =====
+
     @GetMapping("/detalles/eliminar/{idDetalle}")
     public String eliminarDetalle(@PathVariable("idDetalle") Long idDetalle,
                                   @RequestParam("idFactura") Long idFactura) {

@@ -30,36 +30,30 @@ public class MaquinariaServiceImpl implements MaquinariaService {
 
     @PostConstruct
     public void init() {
-        // LISTAR
         listarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_MAQUINARIA")
                 .withProcedureName("SP_LISTAR_MAQUINAS")
                 .declareParameters(new SqlOutParameter("p_resultado", Types.REF_CURSOR))
                 .returningResultSet("p_resultado", this::mapearMaquinaria);
 
-        // INSERTAR
         insertarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_MAQUINARIA")
                 .withProcedureName("SP_INSERTAR_MAQUINA");
 
-        // ACTUALIZAR
         actualizarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_MAQUINARIA")
                 .withProcedureName("SP_ACTUALIZAR_MAQUINA");
 
-        // ELIMINAR
         eliminarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_MAQUINARIA")
                 .withProcedureName("SP_ELIMINAR_MAQUINA");
 
-        // BUSCAR POR NOMBRE (expresión regular)
         buscarPorNombreCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_MAQUINARIA")
                 .withFunctionName("FN_BUSCAR_MAQUINA_POR_NOMBRE")
                 .declareParameters(new SqlOutParameter("RETURN", Types.REF_CURSOR))
                 .returningResultSet("RETURN", this::mapearMaquinaria);
         
-        //Buscar por Estado (Producción)
         buscarPorEstadoCall = new SimpleJdbcCall(jdbcTemplate)
             .withCatalogName("PAQ_MAQUINARIA")
             .withFunctionName("FN_BUSCAR_MAQUINA_POR_ESTADO")

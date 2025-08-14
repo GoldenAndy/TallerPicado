@@ -12,6 +12,19 @@
 <!-- HEADER -->
 <div th:replace="fragmentos :: header"></div>
 
+
+<div class="container mt-3">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
+
 <main class="container bg-white p-4 shadow rounded mb-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="titulo-seccion">🔧 Tipos de Mantenimiento</h2>
@@ -45,8 +58,11 @@
                                 th:attr="data-id=${t.id}, data-nombre=${t.nombre}">
                             <i class="bi bi-pencil-square"></i>
                         </button>
-                        <a th:href="@{'/tipos-mantenimiento/eliminar/' + ${t.id}}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Seguro que desea eliminar este tipo?');">
+                        <a href="#"
+                           class="btn btn-danger btn-sm"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarTipo"
+                           th:attr="data-id=${t.id}, data-nombre=${t.nombre}">
                             <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
@@ -58,47 +74,98 @@
 
 <!-- MODAL: Nuevo Tipo -->
 <div class="modal fade" id="modalNuevoTipo" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form th:action="@{/tipos-mantenimiento/guardar}" method="post" class="modal-content">
-            <div class="modal-header modal-header-success">
-                <h5 class="modal-title">Registrar Tipo de Mantenimiento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="nombreNuevo" name="nombre" required>
-                    <label for="nombreNuevo">Nombre del Tipo</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Guardar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
-    </div>
+  <div class="modal-dialog">
+    <form th:action="@{/tipos-mantenimiento/guardar}" method="post" class="modal-content">
+      <div class="modal-header modal-header-success">
+        <h5 class="modal-title">Registrar Tipo de Mantenimiento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="text"
+                 class="form-control"
+                 id="nombreNuevo"
+                 name="nombre"
+                 required
+                 maxlength="50"
+                 th:value="${tipoNombreIntento}">
+          <label for="nombreNuevo">Nombre del Tipo</label>
+        </div>
+
+        <!-- Error al CREAR (obligatorio/duplicado) -->
+        <div th:if="${errorNuevoTipo}" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <span th:text="${errorNuevoTipo}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- MODAL: Editar Tipo -->
 <div class="modal fade" id="modalEditarTipo" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="formEditarTipo" th:action="@{/tipos-mantenimiento/actualizar/__id__}" method="post" class="modal-content">
-            <div class="modal-header modal-header-warning">
-                <h5 class="modal-title">Editar Tipo de Mantenimiento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="id" id="editId">
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="nombre" id="editNombre" required>
-                    <label for="editNombre">Nombre del Tipo</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-warning">Actualizar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
+  <div class="modal-dialog">
+    <form id="formEditarTipo" th:action="@{/tipos-mantenimiento/actualizar/__id__}" method="post" class="modal-content">
+      <div class="modal-header modal-header-warning">
+        <h5 class="modal-title">Editar Tipo de Mantenimiento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" name="id" id="editId">
+
+        <div class="form-floating mb-3">
+          <input type="text"
+                 class="form-control"
+                 name="nombre"
+                 id="editNombre"
+                 required
+                 maxlength="50">
+          <label for="editNombre">Nombre del Tipo</label>
+        </div>
+
+        <!-- Error al EDITAR (obligatorio/duplicado/no existe) -->
+        <div th:if="${errorEditarTipo}" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <span th:text="${errorEditarTipo}"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-warning">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal Eliminar Tipo -->
+<div class="modal fade" id="modalEliminarTipo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vas a eliminar el tipo de mantenimiento <strong id="tipoDelNombre"></strong>.</p>
+        <p class="mb-0">Si está vinculado a mantenimientos, la operación será bloqueada y verás el motivo arriba en rojo.</p>
+      </div>
+      <div class="modal-footer">
+        <a id="btnConfirmEliminarTipo" href="#" class="btn btn-danger">Eliminar</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -116,6 +183,46 @@
         document.getElementById('editNombre').value = nombre;
         document.getElementById('formEditarTipo').action = '/tipos-mantenimiento/actualizar/' + id;
     });
+</script>
+
+
+<script>
+  const modalEliminarTipo = document.getElementById('modalEliminarTipo');
+  if (modalEliminarTipo) {
+    modalEliminarTipo.addEventListener('show.bs.modal', function (event) {
+      const btn = event.relatedTarget;
+      const id = btn.getAttribute('data-id');
+      const nombre = btn.getAttribute('data-nombre');
+
+      document.getElementById('tipoDelNombre').textContent = nombre || 'este tipo';
+      document.getElementById('btnConfirmEliminarTipo')
+              .setAttribute('href', '/tipos-mantenimiento/eliminar/' + id);
+    });
+  }
+</script>
+
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Reabrir NUEVO si falló
+  const openNuevoTipo = /*[[${openNuevoTipo}]]*/ false;
+  if (openNuevoTipo) {
+    new bootstrap.Modal(document.getElementById('modalNuevoTipo')).show();
+  }
+
+  // Reabrir EDITAR si falló
+  const openEditarTipo = /*[[${openEditarTipo}]]*/ false;
+  if (openEditarTipo) {
+    const id     = /*[[${editIdTipo}]]*/ 0;
+    const nombre = /*[['' + ${editNombreTipo}]]*/ '';
+
+    document.getElementById('editId').value = id;
+    document.getElementById('editNombre').value = nombre || '';
+    document.getElementById('formEditarTipo').action = '/tipos-mantenimiento/actualizar/' + id;
+
+    new bootstrap.Modal(document.getElementById('modalEditarTipo')).show();
+  }
+/*]]>*/
 </script>
 
 </body>

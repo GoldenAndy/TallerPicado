@@ -93,7 +93,7 @@
   </div>
 </main>
 
-<!-- MODAL: Nueva Factura (no pide total) -->
+<!-- Nueva Factura -->
 <div class="modal fade" id="modalNuevaFactura" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form th:action="@{/facturas/guardar}" method="post" class="modal-content">
@@ -131,7 +131,7 @@
   </div>
 </div>
 
-<!-- MODAL: Editar Factura (sin total) -->
+<!-- Editar Factura -->
 <div class="modal fade" id="modalEditarFactura" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="formEditarFactura" th:action="@{/facturas/actualizar/__id__}" method="post" class="modal-content">
@@ -174,7 +174,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Completa el modal de edición
   const modalEditar = document.getElementById('modalEditarFactura');
   modalEditar.addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;

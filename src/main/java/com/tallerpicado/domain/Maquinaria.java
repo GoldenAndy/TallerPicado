@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name = "MAQUINARIA") // cambia TALLERPICADO por tu esquema
+@Table(name = "MAQUINARIA") 
 public class Maquinaria {
     @Id
 @Column(name = "ID_MAQUINA") 
@@ -25,11 +25,11 @@ private Long id;
 
     @Column(name = "ESTADO")
     private String estado;
-    // Constructor vacío obligatorio para JPA
+
     public Maquinaria() {
     }
 
-    // Constructor con todos los campos
+
     public Maquinaria(String estado, LocalDate fechaAdquisicion, Long id, String marca, String nombre) {
         this.estado = estado;
         this.fechaAdquisicion = fechaAdquisicion;

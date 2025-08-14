@@ -1,146 +1,240 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Gestión de Puestos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+  <meta charset="UTF-8">
+  <title>Gestión de Puestos</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<!-- HEADER -->
-<div th:replace="fragmentos :: header"></div>
+  <!-- HEADER -->
+  <div th:replace="fragmentos :: header"></div>
 
-<!-- Buscador -->
-<div class="container mt-4">
-    <form th:action="@{/puestos/buscar}" method="get" class="d-flex justify-content-end w-50 ms-auto mb-3">
-        <input type="text" name="nombre" class="form-control me-2" placeholder="Buscar puesto por nombre..." required>
-        <button type="submit" class="btn btn-outline-primary">
-            <i class="bi bi-search"></i> Buscar
+  <!-- Mensajes (flash) -->
+  <div class="container mt-3">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="container mt-2">
+    <div class="search-card">
+      <form th:action="@{/puestos/buscar}" method="get" class="d-flex justify-content-end w-50 ms-auto">
+        <input type="text" name="nombre" class="form-control me-2"
+               placeholder="Buscar puesto por nombre..." required
+               th:value="${param.nombre}">
+        <button type="submit" class="btn btn-ghost">
+          <i class="bi bi-search"></i> Buscar
         </button>
-        <a th:href="@{/puestos}" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-x-circle"></i> Limpiar
+        <a th:href="@{/puestos}" class="btn btn-ghost ms-2">
+          <i class="bi bi-x-circle"></i> Limpiar
         </a>
-    </form>
-</div>
+      </form>
+    </div>
+  </div>
 
-<!-- CONTENIDO -->
-<main class="container my-5">
+  <!-- CONTENIDO -->
+  <main class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-info">Lista de Puestos</h2>
-        <a href="#" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#modalNuevoPuesto">
-            <i class="bi bi-plus-circle"></i> Nuevo Puesto
-        </a>
+      <h2 class="page-title m-0">Lista de Puestos</h2>
+      <a href="#" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalNuevoPuesto">
+        <i class="bi bi-plus-circle"></i> Nuevo Puesto
+      </a>
     </div>
 
     <!-- Mensaje si no hay resultados -->
     <div th:if="${puestos != null and #lists.isEmpty(puestos)}" class="alert alert-warning text-center">
-        No se encontraron puestos que coincidan con el criterio de búsqueda.
+      No se encontraron puestos que coincidan con el criterio de búsqueda.
     </div>
 
     <!-- Tabla -->
-    <div th:if="${puestos != null}" class="table-responsive shadow rounded">
-        <table class="table table-bordered table-striped table-hover align-middle">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre del Puesto</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="puesto : ${puestos}" class="text-center">
-                    <td th:text="${puesto.id}"></td>
-                    <td th:text="${puesto.nombre}"></td>
-                    <td>
-                        <a href="#"
-                           class="btn btn-warning btn-sm me-2"
-                           data-bs-toggle="modal"
-                           data-bs-target="#modalEditarPuesto"
-                           th:attr="data-id=${puesto.id}, data-nombre=${puesto.nombre}">
-                            <i class="bi bi-pencil-fill"></i>
-                        </a>
-                        <a th:href="@{'/puestos/eliminar/' + ${puesto.id}}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Eliminar este puesto?');">
-                            <i class="bi bi-trash-fill"></i>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</main>
+    <div th:if="${puestos != null}" class="table-responsive glass-card">
+      <table class="table table-bordered table-striped table-hover align-middle mb-0">
+        <thead class="table-primary text-center">
+          <tr>
+            <th>ID</th>
+            <th>Nombre del Puesto</th>
+            <th style="width:160px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="puesto : ${puestos}" class="text-center">
+            <td th:text="${puesto.id}"></td>
+            <td th:text="${puesto.nombre}"></td>
+            <td class="text-center">
+              <a href="#"
+                 class="btn btn-warning btn-sm me-2"
+                 data-bs-toggle="modal"
+                 data-bs-target="#modalEditarPuesto"
+                 th:attr="data-id=${puesto.id}, data-nombre=${puesto.nombre}">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
 
-<!-- Modal Nuevo Puesto -->
-<div class="modal fade" id="modalNuevoPuesto" tabindex="-1" aria-hidden="true">
+              <!-- Botón eliminar abre modal de confirmación -->
+              <a href="#"
+                 class="btn btn-danger btn-sm"
+                 data-bs-toggle="modal"
+                 data-bs-target="#modalEliminarPuesto"
+                 th:attr="data-id=${puesto.id}, data-nombre=${puesto.nombre}">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal Nuevo Puesto -->
+  <div class="modal fade" id="modalNuevoPuesto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form th:action="@{/puestos/guardar}" method="post" class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">Registrar Nuevo Puesto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre del Puesto:</label>
-                    <input type="text" class="form-control" name="nombre" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-info text-white">Guardar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
+      <form th:action="@{/puestos/guardar}" method="post" class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">Registrar Nuevo Puesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del Puesto:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+            <div th:if="${errorNuevo}" class="alert alert-danger mt-2" th:text="${errorNuevo}"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-brand">Guardar</button>
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 
-<div th:if="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-</div>
-
-<!-- Modal Editar Puesto -->
-<div class="modal fade" id="modalEditarPuesto" tabindex="-1" aria-hidden="true">
+  <!-- Modal Editar Puesto -->
+  <div class="modal fade" id="modalEditarPuesto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="formEditarPuesto" th:action="@{/puestos/actualizar/__id__}" method="post" class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">Editar Puesto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="id" id="editId">
-                <div class="mb-3">
-                    <label for="editNombre" class="form-label">Nombre del Puesto:</label>
-                    <input type="text" class="form-control" name="nombre" id="editNombre" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-warning">Actualizar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </form>
+      <!-- NOTA: el action final se setea por JS con el ID -->
+      <form id="formEditarPuesto" th:action="@{/puestos/actualizar/__id__}" method="post" class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">Editar Puesto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="editId">
+          <div class="mb-3">
+            <label for="editNombre" class="form-label">Nombre del Puesto:</label>
+            <input type="text" class="form-control" name="nombre" id="editNombre" required>
+            <div th:if="${errorEditar}" class="alert alert-danger mt-2" th:text="${errorEditar}"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 
-<!-- FOOTER -->
-<div th:replace="fragmentos :: footer"></div>
+  <!-- Modal Eliminar Puesto (confirmación) -->
+  <div class="modal fade" id="modalEliminarPuesto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Confirmar eliminación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>Vas a eliminar el puesto <strong id="delNombre"></strong>.</p>
+          <p class="mb-0">Si el puesto tiene empleados asignados, la operación será bloqueada y verás un mensaje explicando el motivo.</p>
+        </div>
+        <div class="modal-footer">
+          <a id="btnConfirmEliminar" href="#" class="btn btn-danger">
+            Eliminar
+          </a>
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div th:replace="fragmentos :: footer"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    const editarModal = document.getElementById('modalEditarPuesto');
-    editarModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const nombre = button.getAttribute('data-nombre');
+  // Autocerrar alertas a los 5s
+  window.addEventListener('load', () => {
+    const alerts = document.querySelectorAll('.alert');
+    setTimeout(() => {
+      alerts.forEach(a => {
+        const alert = new bootstrap.Alert(a);
+        alert.close();
+      });
+    }, 5000);
+  });
 
-        document.getElementById('editId').value = id;
-        document.getElementById('editNombre').value = nombre;
+  // Modal EDITAR: setear valores
+  const editarModal = document.getElementById('modalEditarPuesto');
+  editarModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const nombre = button.getAttribute('data-nombre');
 
-        const form = document.getElementById('formEditarPuesto');
-        form.action = '/puestos/actualizar/' + id;
-    });
+    document.getElementById('editId').value = id;
+    document.getElementById('editNombre').value = nombre;
+
+    const form = document.getElementById('formEditarPuesto');
+    form.action = '/puestos/actualizar/' + id;
+  });
+
+  // Modal ELIMINAR: setear nombre y href
+  const eliminarModal = document.getElementById('modalEliminarPuesto');
+  eliminarModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const nombre = button.getAttribute('data-nombre');
+
+    document.getElementById('delNombre').textContent = nombre;
+    document.getElementById('btnConfirmEliminar').setAttribute('href', '/puestos/eliminar/' + id);
+  });
 </script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Reabrir modal NUEVO con el nombre que intentó
+  const openNuevo = /*[[${openNuevo}]]*/ false;
+  if (openNuevo) {
+    const nombreIntento = /*[['' + ${nombreIntento}]]*/ '';
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevoPuesto'));
+    const input = document.getElementById('nombre');
+    if (input && nombreIntento) input.value = nombreIntento;
+    modal.show();
+  }
+
+  // Reabrir modal EDITAR con id/nombre que intentó
+  const openEditar = /*[[${openEditar}]]*/ false;
+  if (openEditar) {
+    const id = /*[[${editId}]]*/ 0;
+    const nombre = /*[['' + ${editNombre}]]*/ '';
+    document.getElementById('editId').value = id;
+    document.getElementById('editNombre').value = nombre;
+    document.getElementById('formEditarPuesto').action = '/puestos/actualizar/' + id;
+    new bootstrap.Modal(document.getElementById('modalEditarPuesto')).show();
+  }
+/*]]>*/
+</script>
+
 
 </body>
 </html>

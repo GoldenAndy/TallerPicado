@@ -30,7 +30,7 @@ public class ProduccionController {
     @Autowired
     private OrdenTrabajoService OrdenTrabajoService;
 
-    // Mostrar producciones por orden
+
     @GetMapping("/orden/{idOrden}")
     public String verProduccionPorOrden(@PathVariable Long idOrden, Model model) {
         List<Produccion> producciones = produccionService.buscarPorOrden(idOrden);
@@ -43,7 +43,7 @@ public class ProduccionController {
         return "produccion";
     }
 
-    // Insertar nueva producción
+
     @PostMapping("/guardar")
     public String guardarProduccion(@RequestParam Long idMaquina,
                                     @RequestParam Long idOrden) {
@@ -51,7 +51,7 @@ public class ProduccionController {
         return "redirect:/produccion/orden/" + idOrden;
     }
 
-    // Actualizar producción
+
     @PostMapping("/actualizar/{id}")
     public String actualizarProduccion(@PathVariable Long id,
                                        @RequestParam Long idMaquina,
@@ -79,10 +79,9 @@ public class ProduccionController {
         return "redirect:/produccion/orden/" + idOrden;
     }
 
-    // Eliminar producción
+
     @GetMapping("/eliminar/{id}")
     public String eliminarProduccion(@PathVariable Long id) {
-        // Primero buscamos la orden para redirigir correctamente
         List<Produccion> todas = produccionService.listarTodas();
         Long idOrden = todas.stream()
                             .filter(p -> p.getId().equals(id))

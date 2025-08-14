@@ -26,10 +26,27 @@
 <!-- HEADER -->
 <div th:replace="fragmentos :: header"></div>
 
+<!-- Mensajes (flash) -->
+<div class="container mt-3">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
 <!-- Buscador -->
 <div class="container mt-4">
     <form th:action="@{/proveedores/buscar}" method="get" class="d-flex justify-content-end w-50 ms-auto mb-3">
-        <input type="text" name="nombre" class="form-control me-2" placeholder="Buscar empresa..." required>
+        <input type="text" name="nombre" class="form-control me-2"
+               placeholder="Buscar empresa..." required
+               th:value="${param.nombre}">
+
         <button type="submit" class="btn btn-outline-success">
             <i class="bi bi-search"></i> Buscar
         </button>
@@ -81,8 +98,10 @@
                                     data-correo=${prov.correo}">
                             <i class="bi bi-pencil-fill"></i>
                         </a>
-                        <a th:href="@{'/proveedores/eliminar/' + ${prov.idProveedor}}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Eliminar este proveedor?');">
+                        <a href="#" class="btn btn-danger btn-sm"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarProveedor"
+                           th:attr="data-id=${prov.idProveedor}, data-nombre=${prov.nombreEmpresa}">
                             <i class="bi bi-trash-fill"></i>
                         </a>
                     </td>
@@ -104,6 +123,7 @@
                 <div class="mb-3">
                     <label class="form-label">Nombre de la Empresa:</label>
                     <input type="text" class="form-control" name="nombreEmpresa" required>
+                    <div th:if="${errorNuevoProv}" class="alert alert-danger mt-2" th:text="${errorNuevoProv}"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Celular:</label>
@@ -135,6 +155,9 @@
                 <div class="mb-3">
                     <label class="form-label">Nombre de la Empresa:</label>
                     <input type="text" class="form-control" name="nombreEmpresa" id="editNombre" required>
+                    <!-- Mostrar error al editar (duplicado/correo inválido) -->
+                    <div th:if="${errorEditarProv}" class="alert alert-danger mt-2" th:text="${errorEditarProv}"></div>
+
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Celular:</label>
@@ -151,6 +174,28 @@
             </div>
         </form>
     </div>
+</div>
+
+
+
+<!-- Modal Eliminar Proveedor -->
+<div class="modal fade" id="modalEliminarProveedor" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vas a eliminar al proveedor <strong id="provDelNombre"></strong>.</p>
+        <p class="mb-0">Si está vinculado a empleados, la operación será bloqueada y verás un mensaje explicando el motivo.</p>
+      </div>
+      <div class="modal-footer">
+        <a id="btnConfirmEliminarProv" href="#" class="btn btn-danger">Eliminar</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Footer -->
@@ -175,6 +220,70 @@
         const form = document.getElementById('formEditarProveedor');
         form.action = '/proveedores/actualizar/' + id;
     });
+</script>
+
+
+<script>
+  // Autocerrar alertas a los 5s (opcional)
+  (function () {
+    const alerts = document.querySelectorAll('.alert');
+    if (alerts.length) {
+      setTimeout(() => alerts.forEach(a => new bootstrap.Alert(a).close()), 5000);
+    }
+  })();
+
+  // Modal ELIMINAR proveedor
+  const modalEliminarProveedor = document.getElementById('modalEliminarProveedor');
+  modalEliminarProveedor.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const id = button.getAttribute('data-id');
+    const nombre = button.getAttribute('data-nombre');
+
+    document.getElementById('provDelNombre').textContent = nombre;
+    document.getElementById('btnConfirmEliminarProv')
+            .setAttribute('href', '/proveedores/eliminar/' + id);
+  });
+</script>
+
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Reabrir NUEVO si hubo error (nombre duplicado / correo inválido)
+  const openNuevoProv = /*[[${openNuevoProv}]]*/ false;
+  if (openNuevoProv) {
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevoProveedor'));
+    modal.show();
+
+    const nombre = /*[['' + ${provNombreIntento}]]*/ '';
+    const celular = /*[['' + ${provCelularIntento}]]*/ '';
+    const correo = /*[['' + ${provCorreoIntento}]]*/ '';
+
+    const formNuevo = document.querySelector('#modalNuevoProveedor form');
+    if (formNuevo) {
+      const f = formNuevo;
+      f.querySelector('input[name="nombreEmpresa"]').value = nombre || '';
+      f.querySelector('input[name="celular"]').value       = celular || '';
+      f.querySelector('input[name="correo"]').value        = correo || '';
+    }
+  }
+
+  // Reabrir EDITAR si hubo error (nombre duplicado / correo inválido)
+  const openEditarProv = /*[[${openEditarProv}]]*/ false;
+  if (openEditarProv) {
+    const id      = /*[[${editIdProv}]]*/ 0;
+    const nombre  = /*[['' + ${editNombreProv}]]*/ '';
+    const celular = /*[['' + ${editCelularProv}]]*/ '';
+    const correo  = /*[['' + ${editCorreoProv}]]*/ '';
+
+    document.getElementById('editId').value       = id;
+    document.getElementById('editNombre').value   = nombre || '';
+    document.getElementById('editCelular').value  = celular || '';
+    document.getElementById('editCorreo').value   = correo || '';
+    document.getElementById('formEditarProveedor').action = '/proveedores/actualizar/' + id;
+
+    new bootstrap.Modal(document.getElementById('modalEditarProveedor')).show();
+  }
+/*]]>*/
 </script>
 
 </body>

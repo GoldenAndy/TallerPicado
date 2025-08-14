@@ -119,9 +119,9 @@ public class ArticuloServiceImpl implements ArticuloService {
     articulo.setId(rs.getLong("ID_ARTICULO"));
     articulo.setNombre(rs.getString("NOMBRE"));
     articulo.setDescripcion(rs.getString("DESCRIPCION"));
-    articulo.setPrecio(rs.getDouble("PRECIO"));  // Usar getDouble porque tu entidad usa Double
+    articulo.setPrecio(rs.getDouble("PRECIO")); 
     articulo.setStock(rs.getInt("STOCK"));
-    articulo.setTipo(rs.getString("TIPO")); // Ya es String, no usar charAt
+    articulo.setTipo(rs.getString("TIPO")); 
     return articulo;
 }
 

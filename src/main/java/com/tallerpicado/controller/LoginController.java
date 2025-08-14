@@ -12,13 +12,13 @@ import java.sql.SQLException;
 @Controller
 public class LoginController {
 
-    // Muestra la página de login
+
     @GetMapping("/login")
     public String mostrarLogin() {
         return "login";
     }
 
-    // Procesa el intento de login
+
     @PostMapping("/login")
     public String procesarLogin(@RequestParam String usuario,
                                  @RequestParam String contrasena,
@@ -38,11 +38,10 @@ public class LoginController {
         }
     }
 
-    // Cierra la sesión actual
+
     @GetMapping("/logout")
     public String cerrarSesion(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
     }
 }
-//Hola Heinner 

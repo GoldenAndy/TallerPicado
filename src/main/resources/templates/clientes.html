@@ -23,6 +23,22 @@
     </form>
 </section>
 
+
+<!-- Mensajes (flash) -->
+<div class="container mt-3">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
+
 <!-- CONTENIDO PRINCIPAL -->
 <main class="container bg-white p-4 shadow rounded mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -67,10 +83,12 @@
                                      data-correo=${cliente.correo}">
                             <i class="bi bi-pencil-square"></i>
                         </button>
-                        <a th:href="@{'/clientes/eliminar/' + ${cliente.id}}" 
+                        <a href="#"
                            class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Deseas eliminar este cliente?');">
-                           <i class="bi bi-trash3-fill"></i>
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarCliente"
+                           th:attr="data-id=${cliente.id}, data-nombre=${cliente.nombre}">
+                            <i class="bi bi-trash3-fill"></i>
                         </a>
                     </td>
                 </tr>
@@ -102,6 +120,7 @@
                 </div>
                 <div class="form-floating">
                     <input type="email" class="form-control" name="correo" id="correo">
+                    <div th:if="${errorNuevoCli}" class="alert alert-danger mt-3" th:text="${errorNuevoCli}"></div>
                     <label for="correo">Correo</label>
                 </div>
             </div>
@@ -137,6 +156,7 @@
                 </div>
                 <div class="form-floating">
                     <input type="email" class="form-control" name="correo" id="editCorreo">
+                    <div th:if="${errorEditarCli}" class="alert alert-danger mt-3" th:text="${errorEditarCli}"></div>
                     <label for="editCorreo">Correo</label>
                 </div>
             </div>
@@ -145,6 +165,28 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </form>
+    </div>
+</div>
+
+
+
+<!-- Modal Eliminar Cliente -->
+<div class="modal fade" id="modalEliminarCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-trash3 me-2"></i>Confirmar eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Vas a eliminar al cliente <strong id="cliDelNombre"></strong>.</p>
+                <p class="mb-0">Si tiene órdenes o facturas, la operación será bloqueada y verás el motivo arriba en rojo.</p>
+            </div>
+            <div class="modal-footer">
+                <a id="btnConfirmEliminarCliente" href="#" class="btn btn-danger">Eliminar</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -164,6 +206,66 @@
         document.getElementById('formEditarCliente').action = '/clientes/actualizar/' + button.getAttribute('data-id');
     });
 </script>
+
+<script>
+  // Modal ELIMINAR cliente
+  const modalEliminarCliente = document.getElementById('modalEliminarCliente');
+  if (modalEliminarCliente) {
+    modalEliminarCliente.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const id = button.getAttribute('data-id');
+      const nombre = button.getAttribute('data-nombre');
+
+      document.getElementById('cliDelNombre').textContent = nombre || 'este cliente';
+      document.getElementById('btnConfirmEliminarCliente')
+              .setAttribute('href', '/clientes/eliminar/' + id);
+    });
+  }
+</script>
+
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+  const openNuevoCli = /*[[${openNuevoCli}]]*/ false;
+  if (openNuevoCli) {
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevoCliente'));
+    modal.show();
+
+    const nombre  = /*[['' + ${cliNombreIntento}]]*/ '';
+    const cedula  = /*[['' + ${cliCedulaIntento}]]*/ '';
+    const celular = /*[['' + ${cliCelularIntento}]]*/ '';
+    const correo  = /*[['' + ${cliCorreoIntento}]]*/ '';
+
+    const f = document.querySelector('#modalNuevoCliente form');
+    if (f) {
+      f.querySelector('#nombre').value  = nombre  || '';
+      f.querySelector('#cedula').value  = cedula  || '';
+      f.querySelector('#celular').value = celular || '';
+      f.querySelector('#correo').value  = correo  || '';
+    }
+  }
+
+  // Reabrir EDITAR si hubo error
+  const openEditarCli = /*[[${openEditarCli}]]*/ false;
+  if (openEditarCli) {
+    const id      = /*[[${editIdCli}]]*/ 0;
+    const nombre  = /*[['' + ${editNombreCli}]]*/ '';
+    const cedula  = /*[['' + ${editCedulaCli}]]*/ '';
+    const celular = /*[['' + ${editCelularCli}]]*/ '';
+    const correo  = /*[['' + ${editCorreoCli}]]*/ '';
+
+    document.getElementById('editId').value       = id;
+    document.getElementById('editNombre').value   = nombre  || '';
+    document.getElementById('editCedula').value   = cedula  || '';
+    document.getElementById('editCelular').value  = celular || '';
+    document.getElementById('editCorreo').value   = correo  || '';
+    document.getElementById('formEditarCliente').action = '/clientes/actualizar/' + id;
+
+    new bootstrap.Modal(document.getElementById('modalEditarCliente')).show();
+  }
+/*]]>*/
+</script>
+
 
 </body>
 </html>

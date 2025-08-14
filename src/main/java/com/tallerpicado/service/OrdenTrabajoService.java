@@ -10,7 +10,8 @@ public interface OrdenTrabajoService {
     Optional<OrdenTrabajo> obtenerPorId(Long id);
     OrdenTrabajo guardar(OrdenTrabajo orden);
     OrdenTrabajo actualizar(Long id, OrdenTrabajo orden);
-    void eliminar(Long id);
+    void eliminar(Long id);  
+    void eliminar(Long id, int confirmar);  
     List<OrdenTrabajo> buscarPorEstado(String patron);
     List<OrdenTrabajo> buscarPorNombreCliente(String patron);
     List<OrdenTrabajo> buscarPorClienteYEstado(String nombreCliente, String estado);

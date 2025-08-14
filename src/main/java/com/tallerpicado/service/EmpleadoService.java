@@ -7,23 +7,23 @@ import java.util.Optional;
 
 public interface EmpleadoService {
 
-    List<Empleado> obtenerTodos();  // SP_LISTAR_EMPLEADOS
+    List<Empleado> obtenerTodos(); 
 
     Optional<Empleado> obtenerPorId(Long id);
 
-    Empleado guardar(Empleado empleado);  // SP_INSERTAR_EMPLEADO
+    Empleado guardar(Empleado empleado); 
 
-    Empleado actualizar(Long id, Empleado empleado);  // SP_ACTUALIZAR_EMPLEADO
+    Empleado actualizar(Long id, Empleado empleado);
 
-    void eliminar(Long id);  // SP_ELIMINAR_EMPLEADO
+    void eliminar(Long id); 
 
-    List<Empleado> buscarPorNombre(String patron);  // FN_BUSCAR_EMPLEADO_POR_NOMBRE
+    List<Empleado> buscarPorNombre(String patron); 
 
-    List<Empleado> filtrarPorPuesto(Long idPuesto);  // FN_BUSCAR_EMPLEADO_POR_PUESTO
+    List<Empleado> filtrarPorPuesto(Long idPuesto);  
 
-    List<Empleado> filtrarPorProveedor(Long idProveedor);  // FN_BUSCAR_EMPLEADO_POR_PROVEEDOR
+    List<Empleado> filtrarPorProveedor(Long idProveedor);  
 
-    List<Empleado> filtrarPorEstado(String estado);  // FN_BUSCAR_EMPLEADO_POR_ESTADO
+    List<Empleado> filtrarPorEstado(String estado); 
     
     List<Empleado> filtrarMultiples(String nombre, Long idPuesto, Long idProveedor, String estado);
     

@@ -13,9 +13,9 @@ public class LoginServiceImpl implements LoginService {
     public boolean validarCredenciales(String usuario, String contrasenia) {
         String url = "jdbc:oracle:thin:@192.168.100.69:1521/ORCLPDB";
         try (Connection conn = DriverManager.getConnection(url, usuario, contrasenia)) {
-            return true; // conexión exitosa
+            return true; 
         } catch (SQLException e) {
-            return false; // credenciales incorrectas o error de conexión
+            return false; 
         }
     }
 }

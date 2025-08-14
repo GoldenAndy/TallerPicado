@@ -29,13 +29,11 @@ public class FacturaServiceImpl implements FacturaService {
 
     @PostConstruct
     private void init() {
-        // LISTAR
         listarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withProcedureName("SP_LISTAR_FACTURAS")
                 .returningResultSet("p_resultado", new FacturaRowMapper());
 
-        // INSERTAR (sin total, OUT id)
         insertarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withProcedureName("SP_INSERTAR_FACTURA")
@@ -47,7 +45,6 @@ public class FacturaServiceImpl implements FacturaService {
                         new SqlOutParameter("p_id_factura", Types.NUMERIC)
                 );
 
-        // ACTUALIZAR (sin total)
         actualizarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withProcedureName("SP_ACTUALIZAR_FACTURA")
@@ -59,14 +56,13 @@ public class FacturaServiceImpl implements FacturaService {
                         new SqlParameter("p_id_empleado", Types.NUMERIC)
                 );
 
-        // ELIMINAR
         eliminarCall = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withProcedureName("SP_ELIMINAR_FACTURA")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("p_id_factura", Types.NUMERIC));
 
-        // FUNCIONES de búsqueda (retornan SYS_REFCURSOR)
+ 
         buscarPorClienteFn = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PAQ_FACTURAS")
                 .withFunctionName("FN_BUSCAR_FACTURAS_POR_CLIENTE")
@@ -122,7 +118,6 @@ public class FacturaServiceImpl implements FacturaService {
     @Override
     public List<Factura> buscarPorCliente(String patron) {
         MapSqlParameterSource in = new MapSqlParameterSource().addValue("p_patron", patron);
-        // El return type es List<Factura> gracias al returningResultSet registrado
         return buscarPorClienteFn.executeFunction(List.class, in);
     }
 

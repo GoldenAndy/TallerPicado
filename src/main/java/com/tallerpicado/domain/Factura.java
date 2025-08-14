@@ -33,7 +33,7 @@ public class Factura {
     private Empleado empleado;
 
     @Column(name = "TOTAL", nullable = false)
-    private Double total = 0d;  // el trigger + package lo recalculan, aquí solo aseguramos no-nulo
+    private Double total = 0d; 
 
     public Factura(Long id) {
         this.id = id;

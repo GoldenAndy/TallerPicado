@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ARTICULOS", schema = "sys") // cambia TALLERPICADO por tu esquema
+@Table(name = "ARTICULOS", schema = "sys") 
 @Data
 @NoArgsConstructor
 
@@ -28,7 +28,7 @@ public class Articulo {
     private Integer stock;
 
     @Column(name = "TIPO", nullable = false, length = 1)
-    private String tipo; // 'P' = Producto, 'S' = Servicio
+    private String tipo; 
 
     public Articulo(Long id) {
         this.id = id;

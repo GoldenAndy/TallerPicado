@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/empleados")
@@ -28,7 +29,7 @@ public class EmpleadoController {
     @Autowired
     private ProveedorService proveedorService;
 
-    // Mostrar vista principal con empleados + listas de puestos y proveedores
+ 
     @GetMapping
     public String listarEmpleados(Model model) {
         model.addAttribute("empleados", empleadoService.obtenerTodos());
@@ -55,10 +56,25 @@ public class EmpleadoController {
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminarEmpleado(@PathVariable Long id) {
-        empleadoService.eliminar(id);
+    public String eliminarEmpleado(@PathVariable Long id, RedirectAttributes redirect) {
+        try {
+            empleadoService.eliminar(id);
+            redirect.addFlashAttribute("success", "Empleado eliminado correctamente.");
+        } catch (org.springframework.dao.DataAccessException e) {
+            String msg = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : "";
+            if (msg.contains("ORA-20071")) {
+                redirect.addFlashAttribute("error", msg);
+            } else if (msg.contains("ORA-20073")) { 
+                redirect.addFlashAttribute("error", "El empleado indicado no existe.");
+            } else if (msg.contains("ORA-02292")) { 
+                redirect.addFlashAttribute("error", "No es posible eliminar: el empleado tiene registros relacionados.");
+            } else {
+                redirect.addFlashAttribute("error", "No se pudo eliminar el empleado.");
+            }
+        }
         return "redirect:/empleados";
     }
+
 
     @GetMapping("/buscar")
     public String buscarPorNombre(@RequestParam("nombre") String nombre, Model model) {
@@ -117,20 +133,20 @@ public class EmpleadoController {
     }
     
 
-@GetMapping("/autocompletar")
-@ResponseBody
-public List<Map<String, Object>> autocompletarEmpleados(@RequestParam("q") String query) {
-    List<Empleado> coincidencias = empleadoService.buscarPorNombre(query);
+    @GetMapping("/autocompletar")
+    @ResponseBody
+    public List<Map<String, Object>> autocompletarEmpleados(@RequestParam("q") String query) {
+        List<Empleado> coincidencias = empleadoService.buscarPorNombre(query);
 
-    List<Map<String, Object>> resultados = new ArrayList<>();
-    for (Empleado e : coincidencias) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", e.getId());
-        map.put("nombre", e.getNombre());
-        resultados.add(map);
+        List<Map<String, Object>> resultados = new ArrayList<>();
+        for (Empleado e : coincidencias) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", e.getId());
+            map.put("nombre", e.getNombre());
+            resultados.add(map);
+        }
+        return resultados;
     }
-    return resultados;
-}
 
 
 }

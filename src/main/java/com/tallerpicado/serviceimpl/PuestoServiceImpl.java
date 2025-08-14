@@ -42,50 +42,44 @@ public class PuestoServiceImpl implements PuestoService {
                 .withCatalogName("PAQ_PUESTOS")
                 .withFunctionName("FN_BUSCAR_PUESTO_NOMBRE")
                 .returningResultSet("RETURN", new PuestoRowMapper());
-        
-        
+
         spInsertar = new SimpleJdbcCall(dataSource)
                 .withCatalogName("PAQ_PUESTOS")
                 .withProcedureName("SP_INSERTAR_PUESTO")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
-                    new org.springframework.jdbc.core.SqlParameter("p_nombre", java.sql.Types.VARCHAR)
+                        new org.springframework.jdbc.core.SqlParameter("p_nombre", java.sql.Types.VARCHAR)
                 );
     }
 
     @Override
     public void guardarPuesto(String nombre) {
-        jdbcTemplate.update("{call PAQ_PUESTOS.SP_INSERTAR_PUESTO(?)}", nombre);
-
-        // Verifica si se insertó más de una vez para lanzar advertencia
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM PUESTOS WHERE LOWER(NOMBRE) = LOWER(?)", 
-            Integer.class, nombre.trim()
-        );
-
-        if (count != null && count > 1) {
-            throw new RuntimeException("⚠️ El puesto '" + nombre + "' ya existe más de una vez.");
-        }
+        Map<String, Object> in = new HashMap<>();
+        in.put("p_nombre", nombre);
+        spInsertar.execute(in);
     }
-
 
     @Override
     public void actualizarPuesto(Long id, String nombre) {
+        // El package valida duplicados (ORA-20056) y existencia (ORA-20057)
         jdbcTemplate.update("BEGIN PAQ_PUESTOS.SP_ACTUALIZAR_PUESTO(?, ?); END;", id, nombre);
     }
 
     @Override
     public void eliminarPuesto(Long id) {
+        // El package bloquea si está en uso (ORA-20051)
         jdbcTemplate.update("BEGIN PAQ_PUESTOS.SP_ELIMINAR_PUESTO(?); END;", id);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Puesto> listarPuestos() {
         Map<String, Object> result = spListar.execute(new HashMap<>());
         return (List<Puesto>) result.get("P_RESULTADO");
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Puesto> buscarPorNombre(String patron) {
         Map<String, Object> params = new HashMap<>();
         params.put("p_patron", patron);

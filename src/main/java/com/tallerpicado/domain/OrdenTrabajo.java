@@ -30,7 +30,7 @@ public class OrdenTrabajo {
     @Column(name = "ESTADO", nullable = false, length = 20)
     private String estado;
 
-    // Constructor vacío (necesario para Spring y formularios)
+
     public OrdenTrabajo() {}
 
 }

@@ -41,8 +41,8 @@ public class TipoMantenimientoServiceImpl implements TipoMantenimientoService {
         spListar = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PKG_TIPO_MANTENIMIENTO")
                 .withProcedureName("LISTAR")
-                .declareParameters(new SqlParameter("p_resultado", Types.REF_CURSOR))  // Declaramos el cursor
-                .returningResultSet("p_resultado", (rs, rowNum) -> {                   // Usamos ese mismo nombre
+                .declareParameters(new SqlParameter("p_resultado", Types.REF_CURSOR)) 
+                .returningResultSet("p_resultado", (rs, rowNum) -> {                  
                     TipoMantenimiento tipo = new TipoMantenimiento();
                     tipo.setId(rs.getLong("ID_TIPO"));
                     tipo.setNombre(rs.getString("NOMBRE"));
@@ -64,12 +64,11 @@ public class TipoMantenimientoServiceImpl implements TipoMantenimientoService {
     @Override
     public List<TipoMantenimiento> obtenerTodos() {
         Map<String, Object> result = spListar.execute();
-        return (List<TipoMantenimiento>) result.get("p_resultado"); // ¡Usa el nombre declarado!
+        return (List<TipoMantenimiento>) result.get("p_resultado");
     }
 
     @Override
     public Optional<TipoMantenimiento> obtenerPorId(Long id) {
-        // Opción futura si agregas FN o SP de búsqueda por ID
         return Optional.empty();
     }
 

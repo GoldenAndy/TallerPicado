@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface FacturaService {
     List<Factura> listarTodas();
 
-    /** Inserta por package y devuelve el ID generado */
+
     Long insertar(Factura factura);
 
     void actualizar(Long idFactura, Factura factura);

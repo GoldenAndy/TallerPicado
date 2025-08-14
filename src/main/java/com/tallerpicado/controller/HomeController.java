@@ -10,14 +10,12 @@ public class HomeController {
 
     @GetMapping("/")
     public String mostrarInicio(HttpSession session, Model model) {
-        // Verificamos si hay un usuario conectado
         String usuario = (String) session.getAttribute("usuarioConectado");
 
         if (usuario == null) {
             return "redirect:/login";
         }
 
-        // Lo pasamos a la vista para mostrarlo en el header
         model.addAttribute("usuarioConectado", usuario);
         return "index";
     }

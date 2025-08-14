@@ -1,28 +1,162 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Iniciar Sesión - Taller Picado</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex justify-content-center align-items-center" style="height:100vh;">
+  <meta charset="UTF-8">
+  <title>Iniciar Sesión - Taller Picado</title>
 
-<div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
-    <h4 class="mb-4 text-center">Iniciar Sesión</h4>
-    <form th:action="@{/login}" method="post">
-        <div class="mb-3">
-            <label for="usuario" class="form-label">Usuario Oracle</label>
-            <input type="text" class="form-control" id="usuario" name="usuario" required>
+  <!-- Tu CSS global -->
+  <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Estilo visual a juego con el index (solo UI) -->
+  <style>
+      
+      .auth-card{
+          color: var(--text-1) !important;
+      }
+
+      /* “Acceso” (pill) y “Taller Picado” (título) en blanco sí o sí */
+      .brand-pill,
+      .title{
+          color: var(--text-1) !important;
+          text-shadow: 0 10px 32px rgba(0,162,255,.30), 0 2px 0 rgba(0,0,0,.35);
+      }
+      
+      
+      /* Texto dentro de los inputs (lo que tipeas) ya es var(--text-1),
+   ahora el placeholder y el caret también */
+.form-control{
+  color: var(--text-1);
+  caret-color: var(--text-1);
+}
+.form-control::placeholder{
+  color: rgba(234,242,255,.75); /* un blanco suave para diferenciar del texto real */
+  opacity: 1;                   /* Safari */
+}
+      
+    :root{
+      --page-bg: #0d1724;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-brd: rgba(255,255,255,0.12);
+      --text-1: #eaf2ff;
+      --text-2: #a9b6cd;
+      --brand-1:#27e0a3;
+      --brand-2:#00a2ff;
+      --brand-3:#ff3e7f;
+      --glow: 0 0 24px rgba(39,224,163,0.35);
+    }
+
+    body{
+      background: var(--page-bg) !important;
+      min-height: 100vh;
+      display:flex; align-items:center; justify-content:center;
+      color: var(--text-1);
+    }
+
+    .auth-card{
+      width: 100%; max-width: 420px;
+      border-radius: 22px;
+      border: 1px solid var(--card-brd);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+    }
+
+    .brand-pill{
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.5rem 1rem; border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: linear-gradient(90deg, rgba(39,224,163,.18), rgba(0,162,255,.18));
+      box-shadow: var(--glow);
+      font-weight:700; letter-spacing:.2px;
+    }
+
+    .title{
+      font-weight:900; line-height:1.05;
+      text-shadow: 0 10px 32px rgba(0,162,255,.30), 0 2px 0 rgba(0,0,0,.35);
+    }
+
+    .subtitle{ color: var(--text-2); }
+
+    .input-group-text{
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--card-brd);
+      color: var(--text-1);
+    }
+    .form-control{
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--card-brd);
+      color: var(--text-1);
+    }
+    .form-control:focus{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(0,162,255,.45);
+      box-shadow: 0 0 0 .2rem rgba(0,162,255,.15);
+      color: var(--text-1);
+    }
+    .form-label{ color: var(--text-2); }
+
+    .btn-brand{
+      background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+      color: #07121d;
+      font-weight: 800;
+      border: none;
+      box-shadow: 0 10px 28px rgba(0,162,255,.28), inset 0 0 0 1px rgba(255,255,255,.15);
+    }
+    .btn-brand:hover{ filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-brand:active{ transform: translateY(0); }
+
+    .alert-danger{
+      background: rgba(255, 77, 109, .12);
+      border: 1px solid rgba(255, 77, 109, .35);
+      color: #ffd7de;
+    }
+
+    small.muted{ color: var(--text-2); }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card card p-4 p-md-4 shadow-lg">
+    <div class="text-center mb-3">
+      <span class="brand-pill"><i class="bi bi-shield-lock-fill"></i> Acceso</span>
+    </div>
+    <h3 class="title text-center mb-1">Taller Picado</h3>
+    <p class="subtitle text-center mb-4">Inicie sesión con su usuario de Oracle</p>
+
+    <form th:action="@{/login}" method="post" novalidate>
+      <div class="mb-3">
+        <label for="usuario" class="form-label">Usuario Oracle</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+          <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Ej: TALLERPICADO" required>
         </div>
-        <div class="mb-3">
-            <label for="contrasena" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="contrasena" name="contrasena" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+          <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="••••••••" required>
         </div>
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        <button type="submit" class="btn btn-dark w-100">Ingresar</button>
+      </div>
+
+      <div th:if="${error}" class="alert alert-danger mb-3" th:text="${error}"></div>
+
+      <button type="submit" class="btn btn-brand w-100 py-2">Ingresar</button>
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="muted">Conexión segura • Oracle</small>
+        <!-- Enlace meramente visual; ajusta ruta si deseas -->
+        <a href="#" class="link-light link-underline-opacity-0"><small>¿Olvidaste tu contraseña?</small></a>
+      </div>
     </form>
-</div>
+  </div>
 
 </body>
 </html>
+ 

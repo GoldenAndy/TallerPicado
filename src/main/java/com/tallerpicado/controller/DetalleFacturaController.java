@@ -16,23 +16,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/facturas/detalles") // <-- SIN {idFactura} aquí para evitar chocar el GET raíz
+@RequestMapping("/facturas/detalles")
 @RequiredArgsConstructor
 public class DetalleFacturaController {
 
     private final DetalleFacturaService detalleFacturaService;
-    private final FacturaService facturaService;     // para armar el modelo en /buscar
-    private final ArticuloService articuloService;   // para el combo de artículos en la vista
+    private final FacturaService facturaService; 
+    private final ArticuloService articuloService; 
 
     // Utilidad
     private String redirectTo(Long idFactura) {
         return "redirect:/facturas/detalles/" + idFactura;
     }
 
-    // *** IMPORTANTE: NO definimos @GetMapping("/{idFactura}") aquí ***
-    // Ese endpoint lo atiende FacturaController#verDetalles para renderizar detallefactura.html
 
-    // Buscar (no choca: es /facturas/detalles/{idFactura}/buscar)
     @GetMapping("/{idFactura}/buscar")
     public String buscar(@PathVariable Long idFactura,
                          @RequestParam String patron,
@@ -52,10 +49,10 @@ public class DetalleFacturaController {
         model.addAttribute("idFactura", idFactura);
         model.addAttribute("patron", patron);
 
-        return "detallefactura"; // misma vista que usa el GET de FacturaController
+        return "detallefactura";
     }
 
-    // Crear (solo idArticulo + cantidad; el precio lo calcula Oracle)
+
     @PostMapping("/{idFactura}/crear")
     public String crear(@PathVariable Long idFactura,
                         @RequestParam Long idArticulo,
@@ -75,7 +72,7 @@ public class DetalleFacturaController {
         return redirectTo(idFactura);
     }
 
-    // Actualizar (sin precio)
+
     @PostMapping("/{idFactura}/actualizar/{idDetalle}")
     public String actualizar(@PathVariable Long idFactura,
                              @PathVariable Long idDetalle,
@@ -96,7 +93,7 @@ public class DetalleFacturaController {
         return redirectTo(idFactura);
     }
 
-    // Eliminar
+
     @PostMapping("/{idFactura}/eliminar/{idDetalle}")
     public String eliminar(@PathVariable Long idFactura,
                            @PathVariable Long idDetalle,
@@ -110,7 +107,7 @@ public class DetalleFacturaController {
         return redirectTo(idFactura);
     }
 
-    // Guardar (crear/actualizar con un solo endpoint)
+
     @PostMapping("/{idFactura}/guardar")
     public String guardar(@PathVariable Long idFactura,
                           @RequestParam(required = false) Long id,
@@ -119,7 +116,7 @@ public class DetalleFacturaController {
                           RedirectAttributes ra) {
         try {
             DetalleFactura d = new DetalleFactura();
-            d.setId(id); // null = crear, no-null = actualizar
+            d.setId(id);
             d.setIdFactura(idFactura);
             d.setIdArticulo(idArticulo);
             d.setCantidad(cantidad);
@@ -133,11 +130,7 @@ public class DetalleFacturaController {
         return redirectTo(idFactura);
     }
 
-    // -------- Helpers --------
 
-    /**
-     * Convierte errores Oracle comunes a mensajes entendibles para UI.
-     */
     private String humanizarErrorOracle(DataAccessException ex) {
         Throwable cause = ex.getMostSpecificCause();
         String msg = cause != null ? cause.getMessage() : ex.getMessage();

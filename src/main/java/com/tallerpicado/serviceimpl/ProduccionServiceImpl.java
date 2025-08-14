@@ -116,7 +116,7 @@ public class ProduccionServiceImpl implements ProduccionService {
         return filtradas;
     }
 
-    // Mapeador para convertir el resultado del cursor en objetos Produccion
+
     private static class ProduccionRowMapper implements RowMapper<Produccion> {
         @Override
         public Produccion mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -128,7 +128,7 @@ public class ProduccionServiceImpl implements ProduccionService {
 
             Maquinaria m = new Maquinaria();
             m.setId(rs.getLong("ID_MAQUINA"));
-            m.setNombre(rs.getString("NOMBRE_MAQUINA")); // viene del JOIN
+            m.setNombre(rs.getString("NOMBRE_MAQUINA")); 
             p.setMaquina(m);
 
             OrdenTrabajo o = new OrdenTrabajo();

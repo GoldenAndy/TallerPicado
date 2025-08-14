@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/ordenes")
@@ -110,13 +111,44 @@ public String actualizarOrden(@PathVariable Long id,
 }
 
     
-    
-    
-    
     @GetMapping("/eliminar/{id}")
-    public String eliminarOrden(@PathVariable Long id) {
-        ordenTrabajoService.eliminar(id);
-        return "redirect:/ordenes";
+    public String eliminarOrden(
+            @PathVariable Long id,
+            @RequestParam(name = "confirmar", defaultValue = "0") int confirmar,
+            RedirectAttributes ra) {
+        try {
+
+            ordenTrabajoService.eliminar(id, confirmar);
+
+
+            if (confirmar == 1) {
+                ra.addFlashAttribute("ok", "Orden eliminada junto con sus producciones.");
+            } else {
+                ra.addFlashAttribute("ok", "Orden eliminada.");
+            }
+            return "redirect:/ordenes";
+
+        } catch (org.springframework.dao.DataAccessException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof java.sql.SQLException sqlEx) {
+                int code = sqlEx.getErrorCode();
+
+                if (code == 20050) {
+                    ra.addFlashAttribute("requiereConfirmacion", true);
+                    ra.addFlashAttribute("idPendiente", id);
+                    ra.addFlashAttribute("msg",
+                            "La orden actual tiene producciones en curso, ¿desea borrar ambas?");
+                    return "redirect:/ordenes";
+                }
+
+                if (code == 20051) {
+                    ra.addFlashAttribute("error", "La orden no existe.");
+                    return "redirect:/ordenes";
+                }
+            }
+            ra.addFlashAttribute("error", "No se pudo eliminar la orden: " + e.getMessage());
+            return "redirect:/ordenes";
+        }
     }
 
     @GetMapping("/ver/{id}")
@@ -126,7 +158,7 @@ public String actualizarOrden(@PathVariable Long id,
         return "detalle_orden";
     }
 
-    // 🔎 Autocompletar Clientes
+
     @GetMapping("/clientes/autocompletar")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> autocompletarClientes(@RequestParam("q") String query) {
@@ -140,7 +172,7 @@ public String actualizarOrden(@PathVariable Long id,
         return ResponseEntity.ok(respuesta);
     }
 
-    // 🔎 Autocompletar Empleados
+
     @GetMapping("/empleados/autocompletar")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> autocompletarEmpleados(@RequestParam("q") String query) {
@@ -172,7 +204,7 @@ public String actualizarOrden(@PathVariable Long id,
         } else if (estadoPresente) {
             ordenesFiltradas = ordenTrabajoService.buscarPorEstado(estado);
         } else {
-            ordenesFiltradas = ordenTrabajoService.obtenerTodas(); // sin filtro
+            ordenesFiltradas = ordenTrabajoService.obtenerTodas(); 
         }
 
         model.addAttribute("ordenes", ordenesFiltradas);

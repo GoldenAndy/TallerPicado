@@ -22,7 +22,7 @@ public class MantenimientoController {
     @Autowired
     private MaquinariaService maquinariaService;
 
-    // Mostrar mantenimientos
+
     @GetMapping
     public String vistaMantenimientos(Model model) {
         model.addAttribute("mantenimientos", mantenimientoService.obtenerTodos());
@@ -31,21 +31,21 @@ public class MantenimientoController {
         return "mantenimientos";
     }
 
-    // Guardar nuevo mantenimiento
+
     @PostMapping("/guardar")
     public String guardarMantenimiento(@ModelAttribute Mantenimiento mantenimiento) {
         mantenimientoService.guardar(mantenimiento);
         return "redirect:/mantenimientos";
     }
 
-    // Actualizar mantenimiento existente
+
     @PostMapping("/actualizar/{id}")
     public String actualizarMantenimiento(@PathVariable Long id, @ModelAttribute Mantenimiento mantenimiento) {
         mantenimientoService.actualizar(id, mantenimiento);
         return "redirect:/mantenimientos";
     }
 
-    // Eliminar mantenimiento por ID
+
     @GetMapping("/eliminar/{id}")
     public String eliminarMantenimiento(@PathVariable Long id) {
         mantenimientoService.eliminar(id);

@@ -69,7 +69,7 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public List<Cliente> buscarPorNombre(String patron) {
         Map<String, Object> in = new HashMap<>();
-        in.put("P_PATRON", patron); // asegúrate que el parámetro se llama así en Oracle
+        in.put("P_PATRON", patron); 
         Map<String, Object> result = buscarPorNombreCall.execute(in);
         return (List<Cliente>) result.get("RETURN");
     }
@@ -114,7 +114,7 @@ public class ClienteServiceImpl implements ClienteService {
         eliminarCall.execute(params);
     }
 
-    // Método auxiliar para mapear Cliente desde ResultSet
+
     private Cliente mapearCliente(ResultSet rs, int rowNum) throws SQLException {
         Cliente cliente = new Cliente();
         cliente.setId(rs.getLong("ID_CLIENTE"));
