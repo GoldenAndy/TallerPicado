@@ -6,6 +6,167 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    
+<style>
+  /* (Opcional si ya son globales) */
+  :root{
+    --page-bg:#0d1724; --brand-1:#27e0a3; --brand-2:#00a2ff; --brand-3:#ff3e7f;
+    --card-bg:rgba(255,255,255,0.04); --card-brd:rgba(255,255,255,0.12);
+    --text-1:#eaf2ff; --text-2:#a9b6cd; --glow:0 0 24px rgba(39,224,163,.35);
+  }
+
+  /* Fondo */
+  body.bg-light{ background: var(--page-bg) !important; }
+
+  /* ===== Barra de filtros ===== */
+  /* El <form> que está dentro del <section class="container mt-4"> */
+  section.container.mt-4 > form.row{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--card-brd);
+    border-radius:16px;
+    padding:.9rem;
+    backdrop-filter: blur(6px);
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  section.container.mt-4 .form-control,
+  section.container.mt-4 .form-select{
+    background: rgba(255,255,255,.04);
+    border:1px solid var(--card-brd);
+    color: var(--text-1);
+  }
+  section.container.mt-4 .form-control::placeholder{ color: rgba(234,242,255,.75); opacity:1; }
+  section.container.mt-4 .form-control:focus,
+  section.container.mt-4 .form-select:focus{
+    background: rgba(255,255,255,.05);
+    border-color: rgba(0,162,255,.45);
+    box-shadow: 0 0 0 .2rem rgba(0,162,255,.15);
+    color: var(--text-1);
+  }
+  /* Botones de filtros */
+  section.container.mt-4 .btn-primary{
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+    border:none; color:#07121d; font-weight:800;
+    box-shadow:0 10px 28px rgba(0,162,255,.28), inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  section.container.mt-4 .btn-primary:hover{ filter:brightness(1.05); transform: translateY(-1px); }
+  section.container.mt-4 .btn-outline-secondary{
+    color: var(--text-1);
+    border:1px solid var(--card-brd);
+    background: rgba(255,255,255,.04);
+  }
+  section.container.mt-4 .btn-outline-secondary:hover{ border-color:rgba(255,255,255,.24); background:rgba(255,255,255,.06); }
+
+  /* ===== Mensajes (flash) ===== */
+  .alert-success{ background:rgba(39,224,163,.12); border:1px solid rgba(39,224,163,.35); color:#d9fff1; }
+  .alert-danger { background:rgba(255,77,109,.12); border:1px solid rgba(255,77,109,.35); color:#ffd7de; }
+  .alert-warning{ background:rgba(255,193,7,.14);  border:1px solid rgba(255,193,7,.38);  color:#fff3cd; }
+
+  /* ===== Contenedor principal ===== */
+  main.container.bg-white{
+    background: var(--card-bg) !important;
+    border:1px solid var(--card-brd);
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    color: var(--text-1);
+  }
+  .titulo-seccion{
+    color: var(--text-1);
+    font-weight:900; letter-spacing:.2px; margin:0;
+    text-shadow:0 8px 26px rgba(0,162,255,.25), 0 2px 0 rgba(0,0,0,.35);
+  }
+  .btn-success{
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2)) !important;
+    border:none; color:#07121d !important; font-weight:800;
+    box-shadow:0 10px 28px rgba(0,162,255,.28), inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .btn-success:hover{ filter:brightness(1.05); transform: translateY(-1px); }
+
+  /* ===== Tabla ===== */
+  .table-responsive{ border-radius:16px; overflow:hidden; background:transparent; }
+  .tabla-empleados.table{
+    margin-bottom:0; color: var(--text-1);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-1);
+    --bs-table-border-color: var(--card-brd);
+    --bs-table-striped-bg: rgba(255,255,255,.03);
+    --bs-table-striped-color: var(--text-1);
+  }
+  .tabla-empleados thead.table-success,
+  .tabla-empleados thead.table-success th{
+    background: linear-gradient(90deg, rgba(39,224,163,.22), rgba(0,162,255,.22)) !important;
+    color: var(--text-1) !important;
+    border-bottom: 1px solid var(--card-brd) !important;
+  }
+  .tabla-empleados th, .tabla-empleados td{
+    border-color: var(--card-brd) !important;
+    vertical-align: middle;
+    color: var(--text-1);
+  }
+
+  /* Hover con esencia */
+  .tabla-empleados.table-hover tbody tr{ transition: background .18s ease, box-shadow .18s ease; }
+  .tabla-empleados.table-hover tbody tr:hover,
+  .tabla-empleados.table-hover tbody tr:hover > *{
+    background: linear-gradient(90deg, rgba(39,224,163,.16), rgba(0,162,255,.16)) !important;
+    background-color: transparent !important;
+    color: var(--text-1) !important;
+  }
+  .tabla-empleados.table-hover tbody tr:hover{ box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+
+  /* Lista de proveedores como chips */
+  .tabla-empleados td ul{ display:flex; flex-wrap:wrap; gap:.35rem; justify-content:center; }
+  .tabla-empleados td ul li{
+    list-style:none; margin:0;
+    padding:.15rem .5rem; border-radius:999px;
+    border:1px solid var(--card-brd);
+    background: rgba(255,255,255,.04);
+    color: var(--text-1);
+    font-size:.9rem;
+  }
+
+  /* Botones de acciones */
+  .tabla-empleados .btn-warning.btn-sm{
+    background: linear-gradient(135deg, #ffd24d, #ffb703) !important;
+    border:none; color:#231a00 !important; font-weight:700;
+  }
+  .tabla-empleados .btn-danger.btn-sm{
+    background: linear-gradient(135deg, #ff6680, #ff315a) !important;
+    border:none; color:#2e000a !important; font-weight:700;
+  }
+  .tabla-empleados .btn-warning.btn-sm:hover,
+  .tabla-empleados .btn-danger.btn-sm:hover{ filter:brightness(1.05); }
+
+  /* Responsive */
+  @media (max-width:576px){
+    section.container.mt-4 > form.row{ padding:.7rem; }
+  }
+  
+  /* === Dropdown oscuro para los <select> de la barra de filtros === */
+section.container.mt-4 .form-select{
+  color-scheme: dark;                 /* sugiere tema oscuro al control nativo */
+}
+
+/* Lista de opciones (Chrome/Edge/Firefox/Android) */
+section.container.mt-4 .form-select option,
+section.container.mt-4 .form-select optgroup{
+  background-color:#0e1826;           /* fondo oscuro del menú */
+  color: var(--text-1);               /* texto claro */
+}
+
+/* Opción seleccionada/resaltada */
+section.container.mt-4 .form-select option:checked{
+  background: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+  color:#07121d;
+}
+
+/* Fix de legibilidad en Firefox cuando el select está enfocado */
+section.container.mt-4 .form-select:-moz-focusring{
+  color: transparent;
+  text-shadow: 0 0 0 var(--text-1);
+}
+</style>
+    
+
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 

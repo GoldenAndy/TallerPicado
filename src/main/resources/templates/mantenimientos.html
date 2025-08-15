@@ -6,6 +6,141 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    
+    
+    <style>
+  /* (opcionales si ya están globales) */
+  :root{
+    --page-bg:#0d1724; --brand-1:#27e0a3; --brand-2:#00a2ff; --brand-3:#ff3e7f;
+    --card-bg:rgba(255,255,255,0.04); --card-brd:rgba(255,255,255,0.12);
+    --text-1:#eaf2ff; --text-2:#a9b6cd; --glow:0 0 24px rgba(39,224,163,.35);
+  }
+
+  /* Fondo */
+  body.bg-light{ background: var(--page-bg) !important; }
+
+  /* Contenedor principal */
+  main.container.bg-white{
+    background: var(--card-bg) !important;
+    border:1px solid var(--card-brd);
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    color: var(--text-1);
+  }
+
+  /* Título + botón */
+  .titulo-seccion{
+    color: var(--text-1);
+    font-weight:900; letter-spacing:.2px; margin:0;
+    text-shadow:0 8px 26px rgba(0,162,255,.25), 0 2px 0 rgba(0,0,0,.35);
+  }
+  .btn-success{
+    background: linear-gradient(90deg, var(--brand-1), var(--brand-2)) !important;
+    border:none; color:#07121d !important; font-weight:800;
+    box-shadow:0 10px 28px rgba(0,162,255,.28), inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .btn-success:hover{ filter:brightness(1.05); transform: translateY(-1px); }
+
+  /* Alertas legibles */
+  .alert-success{ background:rgba(39,224,163,.12); border:1px solid rgba(39,224,163,.35); color:#d9fff1; }
+  .alert-warning{ background:rgba(255,193,7,.14);  border:1px solid rgba(255,193,7,.38);  color:#fff3cd; }
+
+  /* Tabla */
+  .table-responsive{ border-radius:16px; overflow:hidden; background:transparent; }
+  .tabla-mantenimientos.table{
+    margin-bottom:0; color: var(--text-1);
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-1);
+    --bs-table-border-color: var(--card-brd);
+    --bs-table-striped-bg: rgba(255,255,255,.03);
+    --bs-table-striped-color: var(--text-1);
+  }
+  .tabla-mantenimientos thead.table-primary,
+  .tabla-mantenimientos thead.table-primary th{
+    background: linear-gradient(90deg, rgba(39,224,163,.22), rgba(0,162,255,.22)) !important;
+    color: var(--text-1) !important;
+    border-bottom: 1px solid var(--card-brd) !important;
+  }
+  .tabla-mantenimientos th,
+  .tabla-mantenimientos td{
+    border-color: var(--card-brd) !important;
+    vertical-align: middle;
+    color: var(--text-1);
+  }
+
+  /* Hover con esencia */
+  .tabla-mantenimientos.table-hover tbody tr{ transition: background .18s ease, box-shadow .18s ease; }
+  .tabla-mantenimientos.table-hover tbody tr:hover,
+  .tabla-mantenimientos.table-hover tbody tr:hover > *{
+    background: linear-gradient(90deg, rgba(39,224,163,.16), rgba(0,162,255,.16)) !important;
+    background-color: transparent !important;
+    color: var(--text-1) !important;
+  }
+  .tabla-mantenimientos.table-hover tbody tr:hover{
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+
+  /* Mejor lectura de la columna Descripción (5ª) */
+  .tabla-mantenimientos td:nth-child(5){
+    text-align: left;               /* que se lea como párrafo */
+    white-space: normal;
+    word-break: break-word;
+    max-width: 560px;               /* evita filas gigantes */
+  }
+  /* Si quieres limitar a 2 líneas, añade 'clamp-2' a la tabla */
+  .tabla-mantenimientos.clamp-2 td:nth-child(5){
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+    overflow:hidden;
+  }
+
+  /* Botones acciones */
+  .tabla-mantenimientos .btn-warning.btn-sm{
+    background: linear-gradient(135deg, #ffd24d, #ffb703) !important;
+    border:none; color:#231a00 !important; font-weight:700;
+  }
+  .tabla-mantenimientos .btn-danger.btn-sm{
+    background: linear-gradient(135deg, #ff6680, #ff315a) !important;
+    border:none; color:#2e000a !important; font-weight:700;
+  }
+  .tabla-mantenimientos .btn-warning.btn-sm:hover,
+  .tabla-mantenimientos .btn-danger.btn-sm:hover{ filter:brightness(1.05); }
+
+  /* Responsive */
+  @media (max-width:576px){
+    .tabla-mantenimientos td:nth-child(5){ max-width: 100%; }
+  }
+  
+  /* Forzar tema oscuro a cualquier .table dentro del main de esta página */
+main.container.bg-white .table{
+  margin-bottom:0; color: var(--text-1);
+  --bs-table-bg: transparent !important;
+  --bs-table-color: var(--text-1);
+  --bs-table-border-color: var(--card-brd);
+  --bs-table-striped-bg: rgba(255,255,255,.03);
+  --bs-table-striped-color: var(--text-1);
+}
+main.container.bg-white thead.table-primary,
+main.container.bg-white thead.table-primary th{
+  background: linear-gradient(90deg, rgba(39,224,163,.22), rgba(0,162,255,.22)) !important;
+  color: var(--text-1) !important;
+  border-bottom: 1px solid var(--card-brd) !important;
+}
+main.container.bg-white .table th,
+main.container.bg-white .table td{
+  border-color: var(--card-brd) !important;
+  vertical-align: middle;
+  color: var(--text-1);
+}
+main.container.bg-white .table-hover tbody tr{ transition: background .18s ease, box-shadow .18s ease; }
+main.container.bg-white .table-hover tbody tr:hover,
+main.container.bg-white .table-hover tbody tr:hover > *{
+  background: linear-gradient(90deg, rgba(39,224,163,.16), rgba(0,162,255,.16)) !important;
+  background-color: transparent !important;
+  color: var(--text-1) !important;
+}
+</style>
+
+    
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
